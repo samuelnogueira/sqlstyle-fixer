@@ -1,0 +1,1 @@
+Fixer for SQL Style as described in https://www.sqlstyle.guide/

@@ -1,0 +1,46 @@
+{
+    "name": "samuelnogueira/sqlstyle-fixer",
+    "description": "Fixer for SQL Style as described in https://www.sqlstyle.guide/",
+    "type": "library",
+    "license": "MIT",
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Samuelnogueira\\SqlstyleFixer\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Samuelnogueira\\SqlstyleFixerTests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Samuel Nogueira",
+            "email": "smcientistamaluco@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "~8.1.0 || ~8.2.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "3.38.2",
+        "phpstan/phpstan": "1.10.41",
+        "phpstan/phpstan-strict-rules": "1.5.2",
+        "phpunit/phpunit": "10.4.2",
+        "slevomat/composer-require-checker-shim": "4.5.0",
+        "thecodingmachine/phpstan-strict-rules": "1.0.0",
+        "thecodingmachine/safe": "2.5.0"
+    },
+    "scripts": {
+        "ci": [
+            "composer validate --strict",
+            "composer-require-checker",
+            "php-cs-fixer check --diff",
+            "phpstan analyse --no-progress",
+            "phpunit"
+        ]
+    }
+}
