@@ -43,25 +43,25 @@ final class SqlStyleLinterTest extends TestCase
     }
 
     /** @dataProvider provideBadExamples */
-    public function testBadExamples(string $filename): void
+    public function testBadExamples(string $fileBefore, string $fileAfter): void
     {
-        $sql = file_get_contents($filename);
+        $sql = file_get_contents($fileBefore);
 
         $subject = new Fixer();
         $result  = $subject->fixString($sql);
 
-        self::assertNotEmpty($result);
+        self::assertStringEqualsFile($fileAfter, $result);
     }
 
     /** @return iterable<string, array{string}> */
     public static function provideBadExamples(): iterable
     {
-        $files = [
-            __DIR__ . '/bad-examples/example_1.sql',
+        $allFiles = [
+            [__DIR__ . '/bad-examples/example_1.sql', __DIR__ . '/bad-examples/example_1.fixed.sql'],
         ];
 
-        foreach ($files as $file) {
-            yield basename($file) => [$file];
+        foreach ($allFiles as $files) {
+            yield basename($files[0]) => $files;
         }
     }
 }
