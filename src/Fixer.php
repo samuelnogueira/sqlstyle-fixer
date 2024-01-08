@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Samuelnogueira\SqlstyleFixer;
 
 use LogicException;
+use PhpMyAdmin\SqlParser\Parser;
 use Samuelnogueira\SqlstyleFixer\Parser\LexerInterface;
 use Samuelnogueira\SqlstyleFixer\Parser\PhpmyadminSqlParser\LexerAdapter;
 use Samuelnogueira\SqlstyleFixer\Parser\TokenInterface;
@@ -37,7 +38,7 @@ final class Fixer
     private function formatList(TokenListInterface $list): void
     {
         $tokens = $list->toArray();
-        $this->riverStack = [self::getRiver($list)];
+        $this->initializeRiver($list);
         foreach ($tokens as $i => $token) {
             // Ignore whitespaces
             if ($token->isWhitespace()) {
@@ -52,10 +53,21 @@ final class Fixer
             $this->handleCasing($token);
 
             // Stop at the first handler that changes something (i.e. returns true).
-            $this->handleParenthesis($token, $prevNonWs, $nextNonWs) ||
-            $this->handleUnion($token, $prev, $next) ||
-            $this->handleRootKeyword($token, $prev, $next);
+            $this->handleParenthesis($token, $prevNonWs, $nextNonWs)
+            || $this->handleUnion($token, $prev, $next)
+            || $this->handleJoin($token, $prev, $next)
+            || $this->handleRootKeyword($token, $prev, $next)
+            || $this->handleExpression($token, $prev, $prevNonWs);
         }
+    }
+
+    private function handleCasing(TokenInterface $token): void
+    {
+        if (!$token->isKeyword()) {
+            return;
+        }
+
+        $token->toUpperCase();
     }
 
     private function handleParenthesis(
@@ -81,15 +93,15 @@ final class Fixer
         }
     }
 
-    private function handleUnion(TokenInterface $token, TokenInterface|null $previous, TokenInterface|null $next): bool
+    private function handleUnion(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $next): bool
     {
         if (!$token->isUnion()) {
             return false;
         }
 
-        if ($previous !== null && $previous->isWhitespace()) {
+        if ($prev !== null && $prev->isWhitespace()) {
             $leftPadding = str_repeat(' ', $this->river() - $token->firstWordLength());
-            $previous->replaceContent(PHP_EOL . PHP_EOL . $leftPadding);
+            $prev->replaceContent(PHP_EOL . PHP_EOL . $leftPadding);
         }
 
         if ($next !== null && $next->isWhitespace()) {
@@ -99,15 +111,15 @@ final class Fixer
         return true;
     }
 
-    private function handleRootKeyword(TokenInterface $token, TokenInterface|null $previous, TokenInterface|null $next): bool
+    private function handleRootKeyword(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $next): bool
     {
         if (!$token->isRootKeyword()) {
             return false;
         }
 
-        if ($previous !== null && $previous->isWhitespace()) {
+        if ($prev !== null && $prev->isWhitespace()) {
             $leftPadding = str_repeat(' ', $this->river() - $token->firstWordLength());
-            $previous->replaceContent(PHP_EOL . $leftPadding);
+            $prev->replaceContent(PHP_EOL . $leftPadding);
         }
 
         if ($next !== null && $next->isWhitespace()) {
@@ -117,23 +129,47 @@ final class Fixer
         return true;
     }
 
-    private function handleCasing(TokenInterface $token): void
+    private function handleExpression(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $prevNonWs): bool
     {
-        if (!$token->isKeyword()) {
-            return;
+        if (!$token->isNone()) {
+            return false;
         }
 
-        $token->toUpperCase();
+        if ($prev !== null && $prev->isWhitespace()) {
+            // Only replace previous whitespace content if it's not an accepted format already
+            if ($prevNonWs?->isKeyword() === true) {
+                $prev->replaceContent(' ');
+            } elseif (! $prev->isSingleSpace()) {
+                $prev->replaceContent(PHP_EOL . str_repeat(' ', $this->river() + 1));
+            }
+        }
+
+        return true;
     }
 
-    private static function getRiver(TokenListInterface $list): int
+    private function handleJoin(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $next): bool
+    {
+        if (!$token->isJoin()) {
+            return false;
+        }
+
+        if ($prev !== null && $prev->isWhitespace()) {
+            $prev->replaceContent(PHP_EOL . str_repeat(' ', $this->river() + 1));
+        }
+
+        return true;
+    }
+
+    private function initializeRiver(TokenListInterface $list): void
     {
         $river = 0;
         foreach ($list->iterate() as $token) {
             if ($token->isOpenParenthesis()) {
                 $river++;
             } elseif ($token->isRootKeyword()) {
-                return $river + $token->firstWordLength();
+                $this->riverStack = [$river + $token->firstWordLength()];
+
+                return;
             }
         }
 

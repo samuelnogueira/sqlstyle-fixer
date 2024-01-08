@@ -18,7 +18,13 @@ interface TokenInterface
 
     public function isUnion(): bool;
 
+    public function isJoin(): bool;
+
     public function isKeyword(): bool;
+
+    public function isNone(): bool;
+
+    public function isSingleSpace(): bool;
 
     public function firstWordLength(): int;
 

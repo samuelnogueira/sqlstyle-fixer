@@ -11,11 +11,6 @@ use Samuelnogueira\SqlstyleFixer\Parser\TokenInterface;
 
 final class TokenAdapter implements TokenInterface
 {
-    private const UNION_KEYWORDS = [
-        'UNION' => true,
-        'UNION ALL' => true,
-        'UNION DISTINCT' => true,
-    ];
     private const ROOT_KEYWORDS = [
         'OR' => true,
     ];
@@ -91,11 +86,26 @@ final class TokenAdapter implements TokenInterface
 
     public function isUnion(): bool
     {
-        return isset(self::UNION_KEYWORDS[$this->token->keyword]);
+        return Parser::$KEYWORD_PARSERS[$this->token->keyword]['field'] === 'union';
     }
 
     public function isKeyword(): bool
     {
         return $this->token->type === Token::TYPE_KEYWORD;
+    }
+
+    public function isNone(): bool
+    {
+        return $this->token->type === Token::TYPE_NONE;
+    }
+
+    public function isSingleSpace(): bool
+    {
+        return $this->token->token === ' ';
+    }
+
+    public function isJoin(): bool
+    {
+        return Parser::$KEYWORD_PARSERS[$this->token->keyword]['field'] === 'join';
     }
 }
