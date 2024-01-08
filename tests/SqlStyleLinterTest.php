@@ -28,7 +28,9 @@ final class SqlStyleLinterTest extends TestCase
         self::assertEquals($sql, $result);
     }
 
-    /** @return iterable<string, array{string}> */
+    /**
+     * @return iterable<string, array{string}>
+     */
     public static function provideGoodExamplesFromWebsite(): iterable
     {
         $directoryIterator = new RecursiveDirectoryIterator(
@@ -43,7 +45,7 @@ final class SqlStyleLinterTest extends TestCase
         }
     }
 
-    /** @dataProvider provideBadExamples */
+    #[DataProvider('provideBadExamples')]
     public function testBadExamples(string $fileBefore, string $fileAfter): void
     {
         $sql = file_get_contents($fileBefore);
@@ -59,6 +61,8 @@ final class SqlStyleLinterTest extends TestCase
     {
         $allFiles = [
             [__DIR__ . '/bad-examples/example_1.sql', __DIR__ . '/bad-examples/example_1.fixed.sql'],
+            [__DIR__ . '/bad-examples/example_2.sql', __DIR__ . '/bad-examples/example_2.fixed.sql'],
+            [__DIR__ . '/bad-examples/example_3.sql', __DIR__ . '/bad-examples/example_3.fixed.sql'],
         ];
 
         foreach ($allFiles as $files) {

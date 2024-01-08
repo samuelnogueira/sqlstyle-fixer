@@ -16,10 +16,13 @@ final class TokenAdapter implements TokenInterface
         'UNION ALL' => true,
         'UNION DISTINCT' => true,
     ];
+    private const ROOT_KEYWORDS = [
+        'OR' => true,
+    ];
     private const NOT_ROOT_KEYWORDS = [
-        'INTO' => true,
-        'CHECK' => true,
-        'ON' => true,
+        'INTO' => false,
+        'CHECK' => false,
+        'ON' => false,
     ];
 
     public function __construct(
@@ -34,18 +37,21 @@ final class TokenAdapter implements TokenInterface
             return false;
         }
 
+        $keyword = $this->token->keyword;
+
         // Keyword most not be in the no-no list
-        if (isset(self::NOT_ROOT_KEYWORDS[$this->token->keyword])) {
+        if (isset(self::NOT_ROOT_KEYWORDS[$keyword])) {
             return false;
         }
 
         // Must not be a JOIN
-        if (isset(JoinKeyword::$JOINS[$this->token->keyword])) {
+        if (isset(JoinKeyword::$JOINS[$keyword])) {
             return false;
         }
 
-        return isset(Parser::$STATEMENT_PARSERS[$this->token->keyword])
-            || isset(Parser::$KEYWORD_PARSERS[$this->token->keyword]);
+        return isset(self::ROOT_KEYWORDS[$keyword])
+            || isset(Parser::$STATEMENT_PARSERS[$keyword])
+            || isset(Parser::$KEYWORD_PARSERS[$keyword]);
     }
 
     public function isWhitespace(): bool
