@@ -16,6 +16,9 @@ use Samuelnogueira\SqlstyleFixer\Parser\TokenListInterface;
  */
 final class Fixer
 {
+    /** @var list<int> */
+    private array $riverStack = [];
+
     public function __construct(private LexerInterface|null $lexer = null)
     {
         $this->lexer = $this->lexer ?? new LexerAdapter();
@@ -33,11 +36,7 @@ final class Fixer
     private function formatList(TokenListInterface $list): void
     {
         $tokens = $list->toArray();
-        if ($tokens === []) {
-            return;
-        }
-
-        $riverStack = [self::getRiver($list)];
+        $this->riverStack = [self::getRiver($list)];
         foreach ($tokens as $i => $token) {
             // Ignore whitespaces
             if ($token->isWhitespace()) {
@@ -46,39 +45,50 @@ final class Fixer
 
             $prev = $tokens[$i - 1] ?? null;
             $next = $tokens[$i + 1] ?? null;
-
-            if ($token->isOpenParenthesis()) {
-                $nextNonWs = $next?->isWhitespace() === false ? $next : ($tokens[$i + 2] ?? null);
-                $prevNonWs = $prev?->isWhitespace() === false ? $prev : ($tokens[$i - 2] ?? null);
-
-                $nextRiver = $riverStack[0];
-                if ($nextNonWs->isSelect() && ! ($prevNonWs?->isUnion() ?? false)) {
-                    $nextRiver = $riverStack[0] + 1 + self::getRiver($list->copySlice($i));
-                }
-
-                array_unshift($riverStack, $nextRiver);
-            } elseif ($token->isCloseParenthesis()) {
-                array_shift($riverStack);
-            }
-
-            $river = $riverStack[0];
+            $prevNonWs = $prev?->isWhitespace() === false ? $prev : ($tokens[$i - 2] ?? null);
+            $nextNonWs = $next?->isWhitespace() === false ? $next : ($tokens[$i + 2] ?? null);
 
             $this->handleCasing($token);
 
             // Stop at the first handler that changes something (i.e. returns true).
-            $this->handleUnion($token, $prev, $next, $river) ||
-            $this->handleRootKeyword($token, $prev, $next, $river);
+            $this->handleParenthesis($token, $prevNonWs, $nextNonWs) ||
+            $this->handleUnion($token, $prev, $next) ||
+            $this->handleRootKeyword($token, $prev, $next);
         }
     }
 
-    private function handleUnion(TokenInterface $token, TokenInterface|null $previous, TokenInterface|null $next, int $river): bool
+    private function handleParenthesis(
+        TokenInterface $token,
+        TokenInterface|null $prevNonWs,
+        TokenInterface|null $nextNonWs,
+    ): bool {
+        if ($token->isOpenParenthesis()) {
+            $baseRiver = $prevNonWs !== null ? $this->river() : -1;
+            if ($nextNonWs?->isSelect() === true && ! ($prevNonWs?->isUnion() ?? false)) {
+                $baseRiver += 8;
+            }
+
+            array_unshift($this->riverStack, $baseRiver);
+
+            return true;
+        } elseif ($token->isCloseParenthesis()) {
+            array_shift($this->riverStack);
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private function handleUnion(TokenInterface $token, TokenInterface|null $previous, TokenInterface|null $next): bool
     {
         if (! $token->isUnion()) {
             return false;
         }
 
         if ($previous !== null && $previous->isWhitespace()) {
-            $previous->replaceContent(PHP_EOL . PHP_EOL . str_repeat(' ', $river - $token->firstWordLength()));
+            $leftPadding = str_repeat(' ', $this->river() - $token->firstWordLength());
+            $previous->replaceContent(PHP_EOL . PHP_EOL . $leftPadding);
         }
 
         if ($next !== null && $next->isWhitespace()) {
@@ -88,14 +98,15 @@ final class Fixer
         return true;
     }
 
-    private function handleRootKeyword(TokenInterface $token, TokenInterface|null $previous, TokenInterface|null $next, int $river): bool
+    private function handleRootKeyword(TokenInterface $token, TokenInterface|null $previous, TokenInterface|null $next): bool
     {
         if (! $token->isRootKeyword()) {
             return false;
         }
 
         if ($previous !== null && $previous->isWhitespace()) {
-            $previous->replaceContent(PHP_EOL . str_repeat(' ', $river - $token->firstWordLength()));
+            $leftPadding = str_repeat(' ', $this->river() - $token->firstWordLength());
+            $previous->replaceContent(PHP_EOL . $leftPadding);
         }
 
         if ($next !== null && $next->isWhitespace()) {
@@ -117,7 +128,7 @@ final class Fixer
     private static function getRiver(TokenListInterface $list): int
     {
         $river = 0;
-        foreach ($list->iterateNonWhitespaceTokens() as $token) {
+        foreach ($list->iterate() as $token) {
             if ($token->isOpenParenthesis()) {
                 $river++;
             } elseif ($token->isRootKeyword()) {
@@ -126,5 +137,10 @@ final class Fixer
         }
 
         throw new LogicException('Could not determine river');
+    }
+
+    private function river(): int
+    {
+        return $this->riverStack[0] ?? 0;
     }
 }
