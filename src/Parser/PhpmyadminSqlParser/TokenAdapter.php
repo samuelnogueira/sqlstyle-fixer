@@ -53,11 +53,6 @@ final class TokenAdapter implements TokenInterface
         return $this->token->type === Token::TYPE_WHITESPACE;
     }
 
-    public function toString(): string
-    {
-        return $this->token->token ?? '';
-    }
-
     public function toUpperCase(): void
     {
         $this->token->token = strtoupper($this->token->token);

@@ -4,59 +4,53 @@ declare(strict_types=1);
 
 namespace Samuelnogueira\SqlstyleFixer\Parser\PhpmyadminSqlParser;
 
-use OutOfRangeException;
-use PhpMyAdmin\SqlParser\Token;
+use Iterator;
 use PhpMyAdmin\SqlParser\TokensList;
-use Samuelnogueira\SqlstyleFixer\Parser\TokenInterface;
 use Samuelnogueira\SqlstyleFixer\Parser\TokenListInterface;
 
 final class TokenListAdapter implements TokenListInterface
 {
-    /** @var list<TokenAdapter> */
-    private array $tokens;
-
-    public function __construct(TokensList $list)
-    {
-        $this->tokens = array_map(
-            static fn (Token $token) => new TokenAdapter($token),
-            $list->tokens,
-        );
+    public function __construct(
+        private readonly TokensList $list
+    ) {
     }
 
-    public function tokens(): array
+    /**
+     * @inheritDoc
+     */
+    public function iterate(): Iterator
     {
-        return $this->tokens;
+        foreach ($this->list->tokens as $token) {
+            yield new TokenAdapter($token);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function toArray(): array
+    {
+        return iterator_to_array($this->iterate(), false);
     }
 
     public function toString(): string
     {
-        $string = '';
-        foreach ($this->tokens as $token) {
-            $string .= $token->toString();
-        }
-
-        return $string;
+        return TokensList::build($this->list);
     }
 
-    public function remove(int $index): void
+    public function iterateNonWhitespaceTokens(): iterable
     {
-        if (! isset($this->tokens[$index])) {
-            throw new OutOfRangeException(sprintf('Invalid index %d', $index));
-        }
-
-        unset($this->tokens[$index]);
-
-        $this->tokens = array_values($this->tokens);
-    }
-
-    public function firstRootKeyword(): TokenInterface|null
-    {
-        foreach ($this->tokens as $token) {
-            if ($token->isRootKeyword()) {
-                return $token;
+        foreach ($this->iterate() as $token) {
+            if ($token->isWhitespace()) {
+                continue;
             }
-        }
 
-        return null;
+            yield $token;
+        }
+    }
+
+    public function copySlice(int $offset): TokenListInterface
+    {
+        return new self(new TokensList(array_slice($this->list->tokens, $offset)));
     }
 }

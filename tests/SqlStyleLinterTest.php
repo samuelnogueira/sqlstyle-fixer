@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Samuelnogueira\SqlstyleFixerTests;
 
 use FilesystemIterator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -16,7 +17,7 @@ use function Safe\file_get_contents;
 
 final class SqlStyleLinterTest extends TestCase
 {
-    /** @dataProvider provideGoodExamplesFromWebsite */
+    #[DataProvider('provideGoodExamplesFromWebsite')]
     public function testGoodExamplesFromWebsite(string $filename): void
     {
         $sql = file_get_contents($filename);

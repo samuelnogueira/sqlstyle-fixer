@@ -20,8 +20,6 @@ interface TokenInterface
 
     public function isKeyword(): bool;
 
-    public function toString(): string;
-
     public function firstWordLength(): int;
 
     public function toUpperCase(): void;
