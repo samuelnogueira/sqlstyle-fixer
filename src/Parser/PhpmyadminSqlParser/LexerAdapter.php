@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Samuelnogueira\SqlstyleFixer\Parser\PhpmyadminSqlParser;
 
 use PhpMyAdmin\SqlParser\Lexer;
@@ -10,10 +12,6 @@ final class LexerAdapter implements LexerInterface
 {
     public function parseString(string $string): TokenListInterface
     {
-        // This lexer adds a DELIMITER token as the last element of the list. We are going to remove that.
-        $list = (new Lexer($string))->list;
-//        unset($list[$list->count - 1]);
-
-        return new TokenListAdapter($list);
+        return new TokenListAdapter((new Lexer($string))->list);
     }
 }

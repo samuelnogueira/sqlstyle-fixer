@@ -1,4 +1,4 @@
-<?php /** @noinspection DuplicatedCode */
+<?php
 
 declare(strict_types=1);
 
@@ -18,10 +18,11 @@ final class Fixer
 {
     /** @var list<int> */
     private array $riverStack = [];
+    private readonly LexerInterface $lexer;
 
-    public function __construct(private LexerInterface|null $lexer = null)
+    public function __construct(LexerInterface|null $lexer = null)
     {
-        $this->lexer = $this->lexer ?? new LexerAdapter();
+        $this->lexer = $lexer ?? new LexerAdapter();
     }
 
     public function fixString(string $sql): string
@@ -58,13 +59,13 @@ final class Fixer
     }
 
     private function handleParenthesis(
-        TokenInterface $token,
+        TokenInterface      $token,
         TokenInterface|null $prevNonWs,
         TokenInterface|null $nextNonWs,
     ): bool {
         if ($token->isOpenParenthesis()) {
             $baseRiver = $prevNonWs !== null ? $this->river() : -1;
-            if ($nextNonWs?->isSelect() === true && ! ($prevNonWs?->isUnion() ?? false)) {
+            if ($nextNonWs?->isSelect() === true && !($prevNonWs?->isUnion() ?? false)) {
                 $baseRiver += 8;
             }
 
@@ -82,7 +83,7 @@ final class Fixer
 
     private function handleUnion(TokenInterface $token, TokenInterface|null $previous, TokenInterface|null $next): bool
     {
-        if (! $token->isUnion()) {
+        if (!$token->isUnion()) {
             return false;
         }
 
@@ -100,7 +101,7 @@ final class Fixer
 
     private function handleRootKeyword(TokenInterface $token, TokenInterface|null $previous, TokenInterface|null $next): bool
     {
-        if (! $token->isRootKeyword()) {
+        if (!$token->isRootKeyword()) {
             return false;
         }
 
@@ -118,7 +119,7 @@ final class Fixer
 
     private function handleCasing(TokenInterface $token): void
     {
-        if (! $token->isKeyword()) {
+        if (!$token->isKeyword()) {
             return;
         }
 

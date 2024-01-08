@@ -60,7 +60,7 @@ final class TokenListAdapter implements TokenListInterface
     public function isFirstNonWhitespace(int $index): bool
     {
         for ($i = $index - 1; $i >= 0; $i--) {
-            if (! $this->at($i)->isWhitespace()) {
+            if (!$this->at($i)->isWhitespace()) {
                 return false;
             }
         }
