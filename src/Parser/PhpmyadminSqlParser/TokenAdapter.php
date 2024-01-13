@@ -108,4 +108,19 @@ final class TokenAdapter implements TokenInterface
     {
         return Parser::$KEYWORD_PARSERS[$this->token->keyword]['field'] === 'join';
     }
+
+    public function isOn(): bool
+    {
+        return $this->token->keyword === 'ON';
+    }
+
+    public function hasTwoWords(): bool
+    {
+        return substr_count($this->token->token, ' ') === 1;
+    }
+
+    public function hasTwoLineBreaks(): bool
+    {
+        return substr_count($this->token->token, PHP_EOL) === 2;
+    }
 }

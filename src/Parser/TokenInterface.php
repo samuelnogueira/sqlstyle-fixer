@@ -20,11 +20,17 @@ interface TokenInterface
 
     public function isJoin(): bool;
 
+    public function isOn(): bool;
+
     public function isKeyword(): bool;
 
     public function isNone(): bool;
 
     public function isSingleSpace(): bool;
+
+    public function hasTwoWords(): bool;
+
+    public function hasTwoLineBreaks(): bool;
 
     public function firstWordLength(): int;
 

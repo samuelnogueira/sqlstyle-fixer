@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Samuelnogueira\SqlstyleFixer;
 
 use LogicException;
-use PhpMyAdmin\SqlParser\Parser;
 use Samuelnogueira\SqlstyleFixer\Parser\LexerInterface;
 use Samuelnogueira\SqlstyleFixer\Parser\PhpmyadminSqlParser\LexerAdapter;
 use Samuelnogueira\SqlstyleFixer\Parser\TokenInterface;
@@ -37,6 +36,7 @@ final class Fixer
 
     private function formatList(TokenListInterface $list): void
     {
+        $prevJoin = null;
         $tokens = $list->toArray();
         $this->initializeRiver($list);
         foreach ($tokens as $i => $token) {
@@ -55,9 +55,13 @@ final class Fixer
             // Stop at the first handler that changes something (i.e. returns true).
             $this->handleParenthesis($token, $prevNonWs, $nextNonWs)
             || $this->handleUnion($token, $prev, $next)
-            || $this->handleJoin($token, $prev, $next)
+            || $this->handleJoin($token, $prev, $prevJoin)
             || $this->handleRootKeyword($token, $prev, $next)
             || $this->handleExpression($token, $prev, $prevNonWs);
+
+            if ($token->isJoin()) {
+                $prevJoin = $token;
+            }
         }
     }
 
@@ -118,8 +122,7 @@ final class Fixer
         }
 
         if ($prev !== null && $prev->isWhitespace()) {
-            $leftPadding = str_repeat(' ', $this->river() - $token->firstWordLength());
-            $prev->replaceContent(PHP_EOL . $leftPadding);
+            $this->alignCharacterBoundary($token, $prev);
         }
 
         if ($next !== null && $next->isWhitespace()) {
@@ -136,25 +139,30 @@ final class Fixer
         }
 
         if ($prev !== null && $prev->isWhitespace()) {
-            // Only replace previous whitespace content if it's not an accepted format already
-            if ($prevNonWs?->isKeyword() === true) {
+            if ($prevNonWs?->isRootKeyword() === true) {
+                // First expression should be in the same line as the root keyword
                 $prev->replaceContent(' ');
             } elseif (! $prev->isSingleSpace()) {
-                $prev->replaceContent(PHP_EOL . str_repeat(' ', $this->river() + 1));
+                // Only replace previous whitespace content if it's not an accepted format already
+                $this->alignOtherSideOfRiver($prev);
             }
         }
 
         return true;
     }
 
-    private function handleJoin(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $next): bool
+    private function handleJoin(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $prevJoin): bool
     {
-        if (!$token->isJoin()) {
+        if (!$token->isJoin() && !$token->isOn()) {
             return false;
         }
 
         if ($prev !== null && $prev->isWhitespace()) {
-            $prev->replaceContent(PHP_EOL . str_repeat(' ', $this->river() + 1));
+            if ($token->hasTwoWords() || ($token->isOn() && $prevJoin->hasTwoWords())) {
+                $this->alignOtherSideOfRiverKeepLineBreak($prev);
+            } else {
+                $this->alignCharacterBoundary($token, $prev);
+            }
         }
 
         return true;
@@ -179,5 +187,27 @@ final class Fixer
     private function river(): int
     {
         return $this->riverStack[0] ?? 0;
+    }
+
+    private function alignCharacterBoundary(TokenInterface $token, TokenInterface $prev): void
+    {
+        $leftPadding = str_repeat(' ', $this->river() - $token->firstWordLength());
+        $prev->replaceContent(PHP_EOL . $leftPadding);
+    }
+
+    private function alignOtherSideOfRiver(TokenInterface $prev): void
+    {
+        $prev->replaceContent(' ');
+        $this->alignOtherSideOfRiverKeepLineBreak($prev);
+    }
+
+    private function alignOtherSideOfRiverKeepLineBreak(TokenInterface $prev): void
+    {
+        $lineBreak = PHP_EOL;
+        if ($prev->hasTwoLineBreaks()) {
+            $lineBreak .= PHP_EOL;
+        }
+
+        $prev->replaceContent($lineBreak . str_repeat(' ', $this->river() + 1));
     }
 }
