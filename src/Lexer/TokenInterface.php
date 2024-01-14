@@ -30,6 +30,8 @@ interface TokenInterface
 
     public function isWhere(): bool;
 
+    public function isBetween(): bool;
+
     public function isLogicalOperator(): bool;
 
     public function hasTwoWords(): bool;

@@ -41,6 +41,7 @@ final class Fixer
     private function formatList(TokenListInterface $list): void
     {
         $prevJoin = null;
+        $prevKeyword = null;
         $tokens = $list->toArray();
         $this->initializeRiver($list);
         foreach ($tokens as $i => $token) {
@@ -60,12 +61,16 @@ final class Fixer
             $this->handleParenthesis($prevNonWs, $token, $nextNonWs)
             || $this->handleUnion($prev, $token, $next)
             || $this->handleJoin($prevJoin, $prev, $token)
-            || $this->handleLogicalOperator($prev, $token, $next)
+            || $this->handleLogicalOperator($prevKeyword, $prev, $token, $next)
             || $this->handleRootKeyword($prev, $token, $next)
             || $this->handleExpression($prevNonWs, $prev, $token);
 
             if ($token->isJoin()) {
                 $prevJoin = $token;
+            }
+
+            if ($token->isKeyword()) {
+                $prevKeyword = $token;
             }
         }
     }
@@ -120,8 +125,12 @@ final class Fixer
         return true;
     }
 
-    private function handleLogicalOperator(TokenInterface|null $prev, TokenInterface $token, TokenInterface|null $next): bool
-    {
+    private function handleLogicalOperator(
+        TokenInterface|null $prevKeyword,
+        TokenInterface|null $prev,
+        TokenInterface $token,
+        TokenInterface|null $next
+    ): bool {
         if (!$token->isLogicalOperator()) {
             return false;
         }
@@ -129,6 +138,8 @@ final class Fixer
         if ($prev !== null && $prev->isWhitespace()) {
             if ($this->insideJoin) {
                 $prev->replaceContent(PHP_EOL . str_repeat(' ', $this->river() + 4));
+            } elseif ($prevKeyword->isBetween()) {
+                $prev->replaceContent(' ');
             } else {
                 $this->alignCharacterBoundary($token, $prev);
             }

@@ -151,4 +151,9 @@ final class TokenAdapter implements TokenInterface
     {
         return isset(self::LOGICAL_OPERATORS[$this->token->keyword]);
     }
+
+    public function isBetween(): bool
+    {
+        return $this->token->keyword === 'BETWEEN';
+    }
 }
