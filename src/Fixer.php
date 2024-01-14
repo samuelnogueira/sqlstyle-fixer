@@ -7,6 +7,7 @@ namespace Samuelnogueira\SqlstyleFixer;
 use LogicException;
 use Samuelnogueira\SqlstyleFixer\Lexer\LexerInterface;
 use Samuelnogueira\SqlstyleFixer\Lexer\PhpmyadminSqlParser\LexerAdapter;
+use Samuelnogueira\SqlstyleFixer\Lexer\StatementSplitter;
 use Samuelnogueira\SqlstyleFixer\Lexer\TokenInterface;
 use Samuelnogueira\SqlstyleFixer\Lexer\TokenListInterface;
 
@@ -29,7 +30,9 @@ final class Fixer
     {
         $list = $this->lexer->parseString($sql);
 
-        $this->formatList($list);
+        foreach (StatementSplitter::fromTokenList($list)->iterateNonDdlStatements() as $statementTokenList) {
+            $this->formatList($statementTokenList);
+        }
 
         return $list->toString();
     }

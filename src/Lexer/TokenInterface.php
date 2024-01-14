@@ -30,6 +30,8 @@ interface TokenInterface
 
     public function hasTwoWords(): bool;
 
+    public function isDdlKeyword(): bool;
+
     public function hasTwoLineBreaks(): bool;
 
     public function firstWordLength(): int;

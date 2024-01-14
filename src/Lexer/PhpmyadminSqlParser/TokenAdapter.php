@@ -15,9 +15,16 @@ final class TokenAdapter implements TokenInterface
         'OR' => true,
     ];
     private const NOT_ROOT_KEYWORDS = [
-        'INTO' => false,
-        'CHECK' => false,
-        'ON' => false,
+        'INTO' => true,
+        'CHECK' => true,
+        'ON' => true,
+    ];
+    private const DDL_KEYWORDS = [
+        'ALTER' => true,
+        'CREATE' => true,
+        'DROP' => true,
+        'RENAME' => true,
+        'TRUNCATE' => true,
     ];
 
     public function __construct(
@@ -122,5 +129,10 @@ final class TokenAdapter implements TokenInterface
     public function hasTwoLineBreaks(): bool
     {
         return substr_count($this->token->token, PHP_EOL) === 2;
+    }
+
+    public function isDdlKeyword(): bool
+    {
+        return isset(self::DDL_KEYWORDS[$this->token->keyword]);
     }
 }
