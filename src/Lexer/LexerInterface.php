@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Samuelnogueira\SqlstyleFixer\Parser;
+namespace Samuelnogueira\SqlstyleFixer\Lexer;
 
 interface LexerInterface
 {

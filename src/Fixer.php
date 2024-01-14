@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Samuelnogueira\SqlstyleFixer;
 
 use LogicException;
-use Samuelnogueira\SqlstyleFixer\Parser\LexerInterface;
-use Samuelnogueira\SqlstyleFixer\Parser\PhpmyadminSqlParser\LexerAdapter;
-use Samuelnogueira\SqlstyleFixer\Parser\TokenInterface;
-use Samuelnogueira\SqlstyleFixer\Parser\TokenListInterface;
+use Samuelnogueira\SqlstyleFixer\Lexer\LexerInterface;
+use Samuelnogueira\SqlstyleFixer\Lexer\PhpmyadminSqlParser\LexerAdapter;
+use Samuelnogueira\SqlstyleFixer\Lexer\TokenInterface;
+use Samuelnogueira\SqlstyleFixer\Lexer\TokenListInterface;
 
 /**
  * @api

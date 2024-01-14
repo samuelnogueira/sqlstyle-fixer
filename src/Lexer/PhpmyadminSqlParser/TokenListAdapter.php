@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Samuelnogueira\SqlstyleFixer\Parser\PhpmyadminSqlParser;
+namespace Samuelnogueira\SqlstyleFixer\Lexer\PhpmyadminSqlParser;
 
 use Iterator;
 use PhpMyAdmin\SqlParser\TokensList;
-use Samuelnogueira\SqlstyleFixer\Parser\TokenInterface;
-use Samuelnogueira\SqlstyleFixer\Parser\TokenListInterface;
+use Samuelnogueira\SqlstyleFixer\Lexer\TokenInterface;
+use Samuelnogueira\SqlstyleFixer\Lexer\TokenListInterface;
 
 final class TokenListAdapter implements TokenListInterface
 {

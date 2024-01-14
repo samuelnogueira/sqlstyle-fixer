@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Samuelnogueira\SqlstyleFixer\Parser\PhpmyadminSqlParser;
+namespace Samuelnogueira\SqlstyleFixer\Lexer\PhpmyadminSqlParser;
 
 use PhpMyAdmin\SqlParser\Lexer;
-use Samuelnogueira\SqlstyleFixer\Parser\LexerInterface;
-use Samuelnogueira\SqlstyleFixer\Parser\TokenListInterface;
+use Samuelnogueira\SqlstyleFixer\Lexer\LexerInterface;
+use Samuelnogueira\SqlstyleFixer\Lexer\TokenListInterface;
 
 final class LexerAdapter implements LexerInterface
 {

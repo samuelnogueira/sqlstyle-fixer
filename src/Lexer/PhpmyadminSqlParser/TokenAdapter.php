@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Samuelnogueira\SqlstyleFixer\Parser\PhpmyadminSqlParser;
+namespace Samuelnogueira\SqlstyleFixer\Lexer\PhpmyadminSqlParser;
 
 use PhpMyAdmin\SqlParser\Components\JoinKeyword;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Token;
-use Samuelnogueira\SqlstyleFixer\Parser\TokenInterface;
+use Samuelnogueira\SqlstyleFixer\Lexer\TokenInterface;
 
 final class TokenAdapter implements TokenInterface
 {
