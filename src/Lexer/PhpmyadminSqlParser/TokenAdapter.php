@@ -156,4 +156,9 @@ final class TokenAdapter implements TokenInterface
     {
         return $this->token->keyword === 'BETWEEN';
     }
+
+    public function toString(): string
+    {
+        return $this->token->token ?? '';
+    }
 }

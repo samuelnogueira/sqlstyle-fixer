@@ -45,4 +45,6 @@ interface TokenInterface
     public function toUpperCase(): void;
 
     public function replaceContent(string $content): void;
+
+    public function toString(): string;
 }

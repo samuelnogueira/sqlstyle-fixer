@@ -17,12 +17,14 @@ use Samuelnogueira\SqlstyleFixer\Lexer\TokenListInterface;
  */
 final class Fixer
 {
+    private readonly LexerInterface $lexer;
+
     /** @var list<int> */
     private array $riverStack = [];
     private bool $insideJoin = false;
-    private readonly LexerInterface $lexer;
+    private string $debugString = '';
 
-    public function __construct(LexerInterface|null $lexer = null)
+    public function __construct(LexerInterface|null $lexer = null, private readonly bool $debug = false)
     {
         $this->lexer = $lexer ?? new LexerAdapter();
     }
@@ -45,6 +47,10 @@ final class Fixer
         $tokens = $list->toArray();
         $this->initializeRiver($list);
         foreach ($tokens as $i => $token) {
+            if ($this->debug) {
+                $this->updateDebugString($tokens, $i);
+            }
+
             // Ignore whitespaces
             if ($token->isWhitespace()) {
                 continue;
@@ -215,6 +221,7 @@ final class Fixer
     {
         $river = 0;
         foreach ($list->iterate() as $token) {
+            assert($token instanceof TokenInterface);
             if ($token->isOpenParenthesis()) {
                 $river++;
             } elseif ($token->isRootKeyword()) {
@@ -229,7 +236,9 @@ final class Fixer
 
     private function river(): int
     {
-        return $this->riverStack[0] ?? 0;
+        assert($this->riverStack !== []);
+
+        return $this->riverStack[0];
     }
 
     private function alignCharacterBoundary(TokenInterface $token, TokenInterface $prev): void
@@ -253,5 +262,18 @@ final class Fixer
         }
 
         $prev->replaceContent($lineBreak . str_repeat(' ', $this->river() + 1));
+    }
+
+    /**
+     * @param list<TokenInterface> $tokens
+     */
+    private function updateDebugString(array $tokens, int $index): void
+    {
+        $this->debugString = '';
+        foreach ($tokens as $i => $token) {
+            $this->debugString .= $i === $index
+                ? "\e" . $token->toString() . "\e"
+                : $token->toString();
+        }
     }
 }
