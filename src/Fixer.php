@@ -57,12 +57,12 @@ final class Fixer
             $this->handleCasing($token);
 
             // Stop at the first handler that changes something (i.e. returns true).
-            $this->handleParenthesis($token, $prevNonWs, $nextNonWs)
-            || $this->handleUnion($token, $prev, $next)
-            || $this->handleJoin($token, $prev, $prevJoin)
-            || $this->handleLogicalOperator($token, $prev, $next)
-            || $this->handleRootKeyword($token, $prev, $next)
-            || $this->handleExpression($token, $prev, $prevNonWs);
+            $this->handleParenthesis($prevNonWs, $token, $nextNonWs)
+            || $this->handleUnion($prev, $token, $next)
+            || $this->handleJoin($prevJoin, $prev, $token)
+            || $this->handleLogicalOperator($prev, $token, $next)
+            || $this->handleRootKeyword($prev, $token, $next)
+            || $this->handleExpression($prevNonWs, $prev, $token);
 
             if ($token->isJoin()) {
                 $prevJoin = $token;
@@ -80,8 +80,8 @@ final class Fixer
     }
 
     private function handleParenthesis(
-        TokenInterface      $token,
         TokenInterface|null $prevNonWs,
+        TokenInterface      $token,
         TokenInterface|null $nextNonWs,
     ): bool {
         if ($token->isOpenParenthesis()) {
@@ -102,7 +102,7 @@ final class Fixer
         }
     }
 
-    private function handleUnion(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $next): bool
+    private function handleUnion(TokenInterface|null $prev, TokenInterface $token, TokenInterface|null $next): bool
     {
         if (!$token->isUnion()) {
             return false;
@@ -120,7 +120,7 @@ final class Fixer
         return true;
     }
 
-    private function handleLogicalOperator(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $next): bool
+    private function handleLogicalOperator(TokenInterface|null $prev, TokenInterface $token, TokenInterface|null $next): bool
     {
         if (!$token->isLogicalOperator()) {
             return false;
@@ -141,7 +141,7 @@ final class Fixer
         return true;
     }
 
-    private function handleRootKeyword(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $next): bool
+    private function handleRootKeyword(TokenInterface|null $prev, TokenInterface $token, TokenInterface|null $next): bool
     {
         if (!$token->isRootKeyword()) {
             return false;
@@ -158,7 +158,7 @@ final class Fixer
         return true;
     }
 
-    private function handleExpression(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $prevNonWs): bool
+    private function handleExpression(TokenInterface|null $prevNonWs, TokenInterface|null $prev, TokenInterface $token): bool
     {
         if (!$token->isNone()) {
             return false;
@@ -177,7 +177,7 @@ final class Fixer
         return true;
     }
 
-    private function handleJoin(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $prevJoin): bool
+    private function handleJoin(TokenInterface|null $prevJoin, TokenInterface|null $prev, TokenInterface $token): bool
     {
         if (!$token->isJoin() && !$token->isOn()) {
             if ($token->isWhere()) {
