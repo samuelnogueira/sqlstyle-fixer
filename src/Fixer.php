@@ -19,6 +19,7 @@ final class Fixer
 {
     /** @var list<int> */
     private array $riverStack = [];
+    private bool $insideJoin = false;
     private readonly LexerInterface $lexer;
 
     public function __construct(LexerInterface|null $lexer = null)
@@ -59,6 +60,7 @@ final class Fixer
             $this->handleParenthesis($token, $prevNonWs, $nextNonWs)
             || $this->handleUnion($token, $prev, $next)
             || $this->handleJoin($token, $prev, $prevJoin)
+            || $this->handleLogicalOperator($token, $prev, $next)
             || $this->handleRootKeyword($token, $prev, $next)
             || $this->handleExpression($token, $prev, $prevNonWs);
 
@@ -118,6 +120,27 @@ final class Fixer
         return true;
     }
 
+    private function handleLogicalOperator(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $next): bool
+    {
+        if (!$token->isLogicalOperator()) {
+            return false;
+        }
+
+        if ($prev !== null && $prev->isWhitespace()) {
+            if ($this->insideJoin) {
+                $prev->replaceContent(PHP_EOL . str_repeat(' ', $this->river() + 4));
+            } else {
+                $this->alignCharacterBoundary($token, $prev);
+            }
+        }
+
+        if ($next !== null && $next->isWhitespace()) {
+            $next->replaceContent(' ');
+        }
+
+        return true;
+    }
+
     private function handleRootKeyword(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $next): bool
     {
         if (!$token->isRootKeyword()) {
@@ -157,8 +180,14 @@ final class Fixer
     private function handleJoin(TokenInterface $token, TokenInterface|null $prev, TokenInterface|null $prevJoin): bool
     {
         if (!$token->isJoin() && !$token->isOn()) {
+            if ($token->isWhere()) {
+                $this->insideJoin = false;
+            }
+
             return false;
         }
+
+        $this->insideJoin = true;
 
         if ($prev !== null && $prev->isWhitespace()) {
             if ($token->hasTwoWords() || ($token->isOn() && $prevJoin->hasTwoWords())) {
@@ -194,6 +223,7 @@ final class Fixer
 
     private function alignCharacterBoundary(TokenInterface $token, TokenInterface $prev): void
     {
+        assert($prev->isWhitespace());
         $leftPadding = str_repeat(' ', $this->river() - $token->firstWordLength());
         $prev->replaceContent(PHP_EOL . $leftPadding);
     }

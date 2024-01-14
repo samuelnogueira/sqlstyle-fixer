@@ -26,6 +26,12 @@ final class TokenAdapter implements TokenInterface
         'RENAME' => true,
         'TRUNCATE' => true,
     ];
+    private const LOGICAL_OPERATORS = [
+        'AND' => true,
+        'NOT' => true,
+        'OR' => true,
+        'XOR' => true,
+    ];
 
     public function __construct(
         private readonly Token $token
@@ -134,5 +140,15 @@ final class TokenAdapter implements TokenInterface
     public function isDdlKeyword(): bool
     {
         return isset(self::DDL_KEYWORDS[$this->token->keyword]);
+    }
+
+    public function isWhere(): bool
+    {
+        return Parser::$KEYWORD_PARSERS[$this->token->keyword]['field'] === 'where';
+    }
+
+    public function isLogicalOperator(): bool
+    {
+        return isset(self::LOGICAL_OPERATORS[$this->token->keyword]);
     }
 }

@@ -28,6 +28,10 @@ interface TokenInterface
 
     public function isSingleSpace(): bool;
 
+    public function isWhere(): bool;
+
+    public function isLogicalOperator(): bool;
+
     public function hasTwoWords(): bool;
 
     public function isDdlKeyword(): bool;
