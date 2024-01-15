@@ -21,7 +21,8 @@ final class Fixer
     /** @var list<int> */
     private array $riverStack = [];
     private bool $insideJoin = false;
-    private string $debugString = '';
+    private int $cursorCol = 0;
+    public string|null $debugString = null;
 
     public function __construct(LexerInterface|null $lexer = null, private readonly bool $debug = false)
     {
@@ -54,6 +55,8 @@ final class Fixer
             if ($token->isWhitespace()) {
                 continue;
             }
+
+            $this->updateCursorCol($tokens, $i);
 
             $prev = $tokens[$i - 1] ?? null;
             $next = $tokens[$i + 1] ?? null;
@@ -95,9 +98,9 @@ final class Fixer
         TokenInterface|null $nextNonWs,
     ): bool {
         if ($token->isOpenParenthesis()) {
-            $baseRiver = $prevNonWs !== null ? $this->river() : -1;
+            $baseRiver = $this->river();
             if ($nextNonWs?->isSelect() === true && !($prevNonWs?->isUnion() ?? false)) {
-                $baseRiver += 8;
+                $baseRiver = $this->cursorCol + $nextNonWs->firstWordLength() + 1;
             }
 
             array_unshift($this->riverStack, $baseRiver);
@@ -238,9 +241,13 @@ final class Fixer
 
     private function alignCharacterBoundary(TokenInterface $token, TokenInterface $prev): void
     {
+        $river = $this->river();
+        $firstWordLength = $token->firstWordLength();
+
         assert($prev->isWhitespace());
-        $leftPadding = str_repeat(' ', $this->river() - $token->firstWordLength());
-        $prev->replaceContent(PHP_EOL . $leftPadding);
+        assert($river >= $firstWordLength);
+
+        $prev->replaceContent(PHP_EOL . str_repeat(' ', $river - $firstWordLength));
     }
 
     private function alignOtherSideOfRiver(TokenInterface $prev): void
@@ -269,6 +276,26 @@ final class Fixer
             $this->debugString .= $i === $index
                 ? "\e" . $token->toString() . "\e"
                 : $token->toString();
+        }
+    }
+
+    /**
+     * @param list<TokenInterface> $tokens
+     */
+    private function updateCursorCol(array $tokens, int $index): void
+    {
+        $this->cursorCol = 0;
+        for ($i = $index - 1; $i >= 0; $i--) {
+            $string = $tokens[$i]->toString();
+            $nlPos  = strrpos($string, PHP_EOL);
+
+            $this->cursorCol += strlen($string);
+            if ($nlPos !== false) {
+                // Add + 1 to account for the PHP_EOL in the string
+                $this->cursorCol -= $nlPos + 1;
+
+                return;
+            }
         }
     }
 }

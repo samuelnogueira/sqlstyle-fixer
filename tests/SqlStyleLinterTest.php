@@ -22,7 +22,7 @@ final class SqlStyleLinterTest extends TestCase
     {
         $sql = file_get_contents($filename);
 
-        $subject = new Fixer();
+        $subject = new Fixer(debug: true);
         $result  = $subject->fixString($sql);
 
         self::assertEquals($sql, $result);
@@ -50,10 +50,20 @@ final class SqlStyleLinterTest extends TestCase
     {
         $sql = file_get_contents($fileBefore);
 
-        $subject = new Fixer();
+        $subject = new Fixer(debug: true);
         $result  = $subject->fixString($sql);
 
         self::assertStringEqualsFile($fileAfter, $result);
+    }
+
+    public function testStableWhiteSpaces(): void
+    {
+        $this->testGoodExamplesFromWebsite(__DIR__ . '/good-examples-from-sqlstyle-guide-website/query-syntax/white-space/spaces_1.sql');
+    }
+
+    public function testStableSubQueries(): void
+    {
+        $this->testGoodExamplesFromWebsite(__DIR__ . '/good-examples-from-sqlstyle-guide-website/query-syntax/indentation/sub_queries_1.sql');
     }
 
     /** @return iterable<string, array{string}> */
