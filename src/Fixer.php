@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Samuelnogueira\SqlstyleFixer;
 
-use LogicException;
 use Samuelnogueira\SqlstyleFixer\Lexer\LexerInterface;
 use Samuelnogueira\SqlstyleFixer\Lexer\PhpmyadminSqlParser\LexerAdapter;
 use Samuelnogueira\SqlstyleFixer\Lexer\StatementSplitter;
@@ -219,19 +218,7 @@ final class Fixer
 
     private function initializeRiver(TokenListInterface $list): void
     {
-        $river = 0;
-        foreach ($list->iterate() as $token) {
-            assert($token instanceof TokenInterface);
-            if ($token->isOpenParenthesis()) {
-                $river++;
-            } elseif ($token->isRootKeyword()) {
-                $this->riverStack = [$river + $token->firstWordLength()];
-
-                return;
-            }
-        }
-
-        throw new LogicException('Could not determine river');
+        $this->riverStack = $list->firstNonWhitespace()?->isOpenParenthesis() === true ? [7] : [6];
     }
 
     private function river(): int
