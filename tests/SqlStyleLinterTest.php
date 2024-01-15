@@ -64,6 +64,7 @@ final class SqlStyleLinterTest extends TestCase
             [__DIR__ . '/bad-examples/example_2.sql', __DIR__ . '/bad-examples/example_2.fixed.sql'],
             [__DIR__ . '/bad-examples/example_3.sql', __DIR__ . '/bad-examples/example_3.fixed.sql'],
             [__DIR__ . '/bad-examples/example_4.sql', __DIR__ . '/bad-examples/example_4.fixed.sql'],
+            [__DIR__ . '/bad-examples/tough_1.sql', __DIR__ . '/bad-examples/tough_1.fixed.sql'],
         ];
 
         foreach ($allFiles as $files) {

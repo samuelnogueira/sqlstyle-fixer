@@ -67,7 +67,7 @@ final class Fixer
             || $this->handleUnion($prev, $token, $next)
             || $this->handleJoin($prevJoin, $prev, $token)
             || $this->handleLogicalOperator($prevKeyword, $prev, $token, $next)
-            || $this->handleRootKeyword($prev, $token, $next)
+            || $this->handleRootKeyword($prevNonWs, $prev, $token, $next)
             || $this->handleExpression($prevNonWs, $prev, $token);
 
             if ($token->isJoin()) {
@@ -157,14 +157,22 @@ final class Fixer
         return true;
     }
 
-    private function handleRootKeyword(TokenInterface|null $prev, TokenInterface $token, TokenInterface|null $next): bool
-    {
+    private function handleRootKeyword(
+        TokenInterface|null $prevNonWs,
+        TokenInterface|null $prev,
+        TokenInterface      $token,
+        TokenInterface|null $next
+    ): bool {
         if (!$token->isRootKeyword()) {
             return false;
         }
 
         if ($prev !== null && $prev->isWhitespace()) {
-            $this->alignCharacterBoundary($token, $prev);
+            if ($prevNonWs->isOpenParenthesis()) {
+                $prev->replaceContent('');
+            } else {
+                $this->alignCharacterBoundary($token, $prev);
+            }
         }
 
         if ($next !== null && $next->isWhitespace()) {
