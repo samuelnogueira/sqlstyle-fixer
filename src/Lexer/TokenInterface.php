@@ -38,6 +38,8 @@ interface TokenInterface
 
     public function isDdlKeyword(): bool;
 
+    public function isAlias(): bool;
+
     public function hasTwoLineBreaks(): bool;
 
     public function firstWordLength(): int;

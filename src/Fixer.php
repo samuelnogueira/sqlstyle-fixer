@@ -66,10 +66,11 @@ final class Fixer
             $this->handleCasing($token);
 
             // Stop at the first handler that changes something (i.e. returns true).
-            $this->handleParenthesis($prevNonWs, $token, $nextNonWs)
+            $this->handleParenthesis($prevNonWs, $prev, $token, $nextNonWs)
             || $this->handleUnion($prev, $token, $next)
             || $this->handleJoin($prevJoin, $prev, $token)
             || $this->handleLogicalOperator($prevKeyword, $prev, $token, $next)
+            || $this->handleAlias($prev, $token, $next)
             || $this->handleRootKeyword($prevNonWs, $prev, $token, $next)
             || $this->handleExpression($prevNonWs, $prev, $token);
 
@@ -94,6 +95,7 @@ final class Fixer
 
     private function handleParenthesis(
         TokenInterface|null $prevNonWs,
+        TokenInterface|null $prev,
         TokenInterface      $token,
         TokenInterface|null $nextNonWs,
     ): bool {
@@ -107,6 +109,10 @@ final class Fixer
 
             return true;
         } elseif ($token->isCloseParenthesis()) {
+            if ($prev->isWhitespace()) {
+                $prev->replaceContent('');
+            }
+
             array_shift($this->riverStack);
 
             return true;
@@ -222,6 +228,23 @@ final class Fixer
             } else {
                 $this->alignCharacterBoundary($token, $prev);
             }
+        }
+
+        return true;
+    }
+
+    private function handleAlias(TokenInterface|null $prev, TokenInterface $token, TokenInterface|null $next): bool
+    {
+        if (!$token->isAlias()) {
+            return false;
+        }
+
+        if ($prev !== null && $prev->isWhitespace()) {
+            $prev->replaceContent(' ');
+        }
+
+        if ($next !== null && $next->isWhitespace()) {
+            $next->replaceContent(' ');
         }
 
         return true;

@@ -161,4 +161,9 @@ final class TokenAdapter implements TokenInterface
     {
         return $this->token->token ?? '';
     }
+
+    public function isAlias(): bool
+    {
+        return $this->token->keyword === 'AS';
+    }
 }
