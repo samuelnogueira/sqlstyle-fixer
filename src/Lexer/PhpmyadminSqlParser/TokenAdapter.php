@@ -99,7 +99,7 @@ final class TokenAdapter implements TokenInterface
 
     public function isUnion(): bool
     {
-        return Parser::$KEYWORD_PARSERS[$this->token->keyword]['field'] === 'union';
+        return (Parser::$KEYWORD_PARSERS[$this->token->keyword]['field'] ?? null) === 'union';
     }
 
     public function isKeyword(): bool
@@ -119,7 +119,7 @@ final class TokenAdapter implements TokenInterface
 
     public function isJoin(): bool
     {
-        return Parser::$KEYWORD_PARSERS[$this->token->keyword]['field'] === 'join';
+        return (Parser::$KEYWORD_PARSERS[$this->token->keyword]['field'] ?? null) === 'join';
     }
 
     public function isOn(): bool
@@ -144,7 +144,7 @@ final class TokenAdapter implements TokenInterface
 
     public function isWhere(): bool
     {
-        return Parser::$KEYWORD_PARSERS[$this->token->keyword]['field'] === 'where';
+        return (Parser::$KEYWORD_PARSERS[$this->token->keyword]['field'] ?? null) === 'where';
     }
 
     public function isLogicalOperator(): bool

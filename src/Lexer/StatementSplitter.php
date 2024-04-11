@@ -23,8 +23,7 @@ final class StatementSplitter
     public function iterateNonDdlStatements(): Iterator
     {
         foreach ($this->tokenList->iterate() as $token) {
-            assert($token instanceof TokenInterface);
-
+            /** @var TokenInterface $token */
             if ($token->isDdlKeyword()) {
                 return;
             }

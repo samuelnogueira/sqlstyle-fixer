@@ -152,7 +152,7 @@ final class Fixer
         if ($prev !== null && $prev->isWhitespace()) {
             if ($this->insideJoin) {
                 $prev->replaceContent(PHP_EOL . str_repeat(' ', $this->river() + 4));
-            } elseif ($prevKeyword->isBetween()) {
+            } elseif ($prevKeyword?->isBetween() ?? false) {
                 $prev->replaceContent(' ');
             } else {
                 $this->alignCharacterBoundary($token, $prev);
@@ -177,7 +177,7 @@ final class Fixer
         }
 
         if ($prev !== null && $prev->isWhitespace()) {
-            if ($prevNonWs->isOpenParenthesis()) {
+            if ($prevNonWs?->isOpenParenthesis() ?? false) {
                 $prev->replaceContent('');
             } else {
                 $this->alignCharacterBoundary($token, $prev);
@@ -223,7 +223,13 @@ final class Fixer
         $this->insideJoin = true;
 
         if ($prev !== null && $prev->isWhitespace()) {
-            if ($token->hasTwoWords() || ($token->isOn() && $prevJoin->hasTwoWords())) {
+            if (
+                $token->hasTwoWords() ||
+                (
+                    $token->isOn() &&
+                    ($prevJoin?->hasTwoWords() ?? false)
+                )
+            ) {
                 $this->alignOtherSideOfRiverKeepLineBreak($prev);
             } else {
                 $this->alignCharacterBoundary($token, $prev);
