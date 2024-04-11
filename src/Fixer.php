@@ -198,7 +198,7 @@ final class Fixer
         }
 
         if ($prev !== null && $prev->isWhitespace()) {
-            if ($prevNonWs?->isRootKeyword() === true) {
+            if ($prevNonWs !== null && ($prevNonWs->isRootKeyword() || $prevNonWs->isDistinct())) {
                 // First expression should be in the same line as the root keyword
                 $prev->replaceContent(' ');
             } elseif (! $prev->isSingleSpace()) {

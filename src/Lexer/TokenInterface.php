@@ -30,6 +30,8 @@ interface TokenInterface
 
     public function isWhere(): bool;
 
+    public function isDistinct(): bool;
+
     public function isBetween(): bool;
 
     public function isLogicalOperator(): bool;
@@ -49,4 +51,5 @@ interface TokenInterface
     public function replaceContent(string $content): void;
 
     public function toString(): string;
+
 }

@@ -107,6 +107,10 @@ final class TokenAdapter implements TokenInterface
         return $this->token->type === Token::TYPE_KEYWORD;
     }
 
+    /**
+     * Whether token is invalid or its type cannot be determined because of the ambiguous context. Further analysis
+     * might be required to detect its type.
+     */
     public function isNone(): bool
     {
         return $this->token->type === Token::TYPE_NONE;
@@ -165,5 +169,10 @@ final class TokenAdapter implements TokenInterface
     public function isAlias(): bool
     {
         return $this->token->keyword === 'AS';
+    }
+
+    public function isDistinct(): bool
+    {
+        return $this->token->keyword === 'DISTINCT';
     }
 }
