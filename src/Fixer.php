@@ -109,7 +109,7 @@ final class Fixer
 
             return true;
         } elseif ($token->isCloseParenthesis()) {
-            if ($prev->isWhitespace()) {
+            if ($prev?->isWhitespace() ?? false) {
                 $prev->replaceContent('');
             }
 

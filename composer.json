@@ -28,6 +28,7 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "3.53.0",
+        "phparkitect/phparkitect": "^0.3.29",
         "phpstan/phpstan": "1.10.41",
         "phpstan/phpstan-strict-rules": "1.5.2",
         "phpunit/phpunit": "10.4.2",
