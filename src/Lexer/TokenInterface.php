@@ -16,6 +16,8 @@ interface TokenInterface
 
     public function isSelect(): bool;
 
+    public function isPartitionBy(): bool;
+
     public function isUnion(): bool;
 
     public function isJoin(): bool;

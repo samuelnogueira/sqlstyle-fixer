@@ -175,4 +175,9 @@ final class TokenAdapter implements TokenInterface
     {
         return $this->token->keyword === 'DISTINCT';
     }
+
+    public function isPartitionBy(): bool
+    {
+        return $this->token->keyword === 'PARTITION BY';
+    }
 }

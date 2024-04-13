@@ -101,7 +101,7 @@ final class Fixer
     ): bool {
         if ($token->isOpenParenthesis()) {
             $baseRiver = $this->river();
-            if ($nextNonWs?->isSelect() === true && !($prevNonWs?->isUnion() ?? false)) {
+            if ($nextNonWs !== null && self::startsNewRiver($nextNonWs) && !($prevNonWs?->isUnion() ?? false)) {
                 $baseRiver = $this->cursorCol + $nextNonWs->firstWordLength() + 1;
             }
 
@@ -328,5 +328,11 @@ final class Fixer
                 return;
             }
         }
+    }
+
+    private static function startsNewRiver(TokenInterface $nextNonWs): bool
+    {
+        return $nextNonWs->isSelect() === true
+            || $nextNonWs->isPartitionBy() === true;
     }
 }
