@@ -10,7 +10,8 @@
                            data_by_row,
                            field_4,
                            field_5,
-                           LAG(other_field_2) OVER (PARTITION BY other_id, other_field_1 ORDER BY 5) AS previous_other_field_2
+                           LAG(other_field_2) OVER (PARTITION BY other_id, other_field_1
+                                                        ORDER BY 5) AS previous_other_field_2
                       FROM prod.my_other_data),
 /*
 This is a very long comment: It is good practice to leave comments in code to

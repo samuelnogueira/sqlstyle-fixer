@@ -109,7 +109,7 @@ final class Fixer
 
             return true;
         } elseif ($token->isCloseParenthesis()) {
-            if ($prev?->isWhitespace() ?? false) {
+            if ($prev?->isWhitespace() === true) {
                 $prev->replaceContent('');
             }
 
@@ -127,12 +127,12 @@ final class Fixer
             return false;
         }
 
-        if ($prev !== null && $prev->isWhitespace()) {
+        if ($prev?->isWhitespace() === true) {
             $leftPadding = str_repeat(' ', $this->river() - $token->firstWordLength());
             $prev->replaceContent(PHP_EOL . PHP_EOL . $leftPadding);
         }
 
-        if ($next !== null && $next->isWhitespace()) {
+        if ($next?->isWhitespace() === true) {
             $next->replaceContent(PHP_EOL . PHP_EOL);
         }
 
@@ -149,17 +149,17 @@ final class Fixer
             return false;
         }
 
-        if ($prev !== null && $prev->isWhitespace()) {
+        if ($prev?->isWhitespace() === true) {
             if ($this->insideJoin) {
                 $prev->replaceContent(PHP_EOL . str_repeat(' ', $this->river() + 4));
-            } elseif ($prevKeyword?->isBetween() ?? false) {
+            } elseif ($prevKeyword?->isBetween() === true) {
                 $prev->replaceContent(' ');
             } else {
                 $this->alignCharacterBoundary($token, $prev);
             }
         }
 
-        if ($next !== null && $next->isWhitespace()) {
+        if ($next?->isWhitespace() === true) {
             $next->replaceContent(' ');
         }
 
@@ -176,15 +176,15 @@ final class Fixer
             return false;
         }
 
-        if ($prev !== null && $prev->isWhitespace()) {
-            if ($prevNonWs?->isOpenParenthesis() ?? false) {
+        if ($prev?->isWhitespace() === true) {
+            if ($prevNonWs?->isOpenParenthesis() === true) {
                 $prev->replaceContent('');
             } else {
                 $this->alignCharacterBoundary($token, $prev);
             }
         }
 
-        if ($next !== null && $next->isWhitespace()) {
+        if ($next?->isWhitespace() === true) {
             $next->replaceContent(' ');
         }
 
@@ -201,6 +201,8 @@ final class Fixer
             if ($prevNonWs !== null && ($prevNonWs->isRootKeyword() || $prevNonWs->isDistinct())) {
                 // First expression should be in the same line as the root keyword
                 $prev->replaceContent(' ');
+            } elseif ($prevNonWs !== null && $prevNonWs->isOpenParenthesis()) {
+                $prev->replaceContent('');
             } elseif (! $prev->isSingleSpace()) {
                 // Only replace previous whitespace content if it's not an accepted format already
                 $this->alignOtherSideOfRiver($prev);
@@ -222,7 +224,7 @@ final class Fixer
 
         $this->insideJoin = true;
 
-        if ($prev !== null && $prev->isWhitespace()) {
+        if ($prev?->isWhitespace() === true) {
             if (
                 $token->hasTwoWords() ||
                 (
@@ -245,11 +247,11 @@ final class Fixer
             return false;
         }
 
-        if ($prev !== null && $prev->isWhitespace()) {
+        if ($prev?->isWhitespace() === true) {
             $prev->replaceContent(' ');
         }
 
-        if ($next !== null && $next->isWhitespace()) {
+        if ($next?->isWhitespace() === true) {
             $next->replaceContent(' ');
         }
 

@@ -17,13 +17,14 @@ use function Safe\file_get_contents;
 
 final class SqlStyleLinterTest extends TestCase
 {
+    private Fixer $subject;
+
     #[DataProvider('provideGoodExamplesFromWebsite')]
     public function testGoodExamplesFromWebsite(string $filename): void
     {
         $sql = file_get_contents($filename);
 
-        $subject = new Fixer(debug: true);
-        $result  = $subject->fixString($sql);
+        $result = $this->subject->fixString($sql);
 
         self::assertEquals($sql, $result);
     }
@@ -50,20 +51,25 @@ final class SqlStyleLinterTest extends TestCase
     {
         $sql = file_get_contents($fileBefore);
 
-        $subject = new Fixer(debug: true);
-        $result  = $subject->fixString($sql);
+        $result = $this->subject->fixString($sql);
 
         self::assertStringEqualsFile($fileAfter, $result);
     }
 
-    public function testStableWhiteSpaces(): void
+    public function testInlineFunctionArguments(): void
     {
-        $this->testGoodExamplesFromWebsite(__DIR__ . '/good-examples-from-sqlstyle-guide-website/query-syntax/white-space/spaces_1.sql');
-    }
-
-    public function testStableSubQueries(): void
-    {
-        $this->testGoodExamplesFromWebsite(__DIR__ . '/good-examples-from-sqlstyle-guide-website/query-syntax/indentation/sub_queries_1.sql');
+        self::assertEquals(
+            <<<'SQL'
+SELECT LAG(my_column)
+SQL,
+            $this->subject->fixString(
+                <<<'SQL'
+SELECT LAG(
+    my_column
+)
+SQL
+            )
+        );
     }
 
     /** @return iterable<string, array{string}> */
@@ -80,5 +86,12 @@ final class SqlStyleLinterTest extends TestCase
         foreach ($allFiles as $files) {
             yield basename($files[0]) => $files;
         }
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->subject = new Fixer(debug: true);
     }
 }
