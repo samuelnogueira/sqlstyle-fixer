@@ -6,6 +6,6 @@ SELECT column_name1,
     ON table_1.id = table_2.id
  WHERE clouds = true
    AND gem = true
- GROUP BY 1,2,3
+ GROUP BY 1, 2, 3
 HAVING column_name1 > 0
    AND column_name2 > 0
