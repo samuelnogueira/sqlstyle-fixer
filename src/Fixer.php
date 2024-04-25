@@ -67,13 +67,13 @@ final class Fixer
 
             // Stop at the first handler that changes something (i.e. returns true).
             $this->handleParenthesis($prevNonWs, $prev, $token, $nextNonWs)
-            || $this->handleCaseStatement($prevNonWs, $prev, $token, $next)
+            || $this->handleCaseStatement($prevNonWs, $prev, $token)
             || $this->handleUnion($prev, $token, $next)
             || $this->handleJoin($prevJoin, $prev, $token)
             || $this->handleLogicalOperator($prevKeyword, $prev, $token, $next)
             || $this->handleAlias($prev, $token, $next)
             || $this->handleRootKeyword($prevNonWs, $prev, $token, $next)
-            || $this->handleExpression($prevNonWs, $prev, $token);
+            || $this->handleExpression($prevNonWs, $prev, $token, $nextNonWs);
 
             if ($token->isJoin()) {
                 $prevJoin = $token;
@@ -184,9 +184,13 @@ final class Fixer
         return true;
     }
 
-    private function handleExpression(TokenInterface|null $prevNonWs, TokenInterface|null $prev, TokenInterface $token): bool
-    {
-        if (!$token->isNone()) {
+    private function handleExpression(
+        TokenInterface|null $prevNonWs,
+        TokenInterface|null $prev,
+        TokenInterface $token,
+        TokenInterface|null $nextNonWs,
+    ): bool {
+        if (!$token->isNone() && !self::isFunction($token, $nextNonWs)) {
             return false;
         }
 
@@ -240,7 +244,6 @@ final class Fixer
         TokenInterface|null $prevNonWs,
         TokenInterface|null $prev,
         TokenInterface $token,
-        TokenInterface|null $next,
     ): bool {
         if (
             ! $token->isCase() &&
@@ -338,9 +341,11 @@ final class Fixer
     {
         $this->debugString = '';
         foreach ($tokens as $i => $token) {
-            $this->debugString .= $i === $index
-                ? "\e" . $token->toString() . "\e"
+            $tokenStr = $i === $index
+                ? '›' . $token->toString() . '‹'
                 : $token->toString();
+
+            $this->debugString .= $tokenStr;
         }
     }
 
@@ -380,5 +385,10 @@ final class Fixer
         }
 
         $token->replaceContent($content);
+    }
+
+    private static function isFunction(TokenInterface $token, TokenInterface|null $nextNonWs): bool
+    {
+        return $token->isKeyword() && ($nextNonWs?->isOpenParenthesis() === true);
     }
 }

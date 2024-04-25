@@ -101,6 +101,27 @@ SQL,
         );
     }
 
+    public function testFunctions(): void
+    {
+        self::assertEquals(
+            <<<'SQL'
+SELECT AVG(b.height) AS average_height,
+       AVG(b.diameter) AS average_diameter,
+       COUNT(*) AS total
+  FROM botanic_garden_flora AS b
+SQL,
+            $this->subject->fixString(
+                <<<'SQL'
+SELECT
+AVG(b.height) AS average_height,
+  AVG(b.diameter) AS average_diameter,
+   COUNT(*) AS total
+  FROM botanic_garden_flora AS b
+SQL,
+            ),
+        );
+    }
+
     /** @return iterable<string, array{string}> */
     public static function provideBadExamples(): iterable
     {
