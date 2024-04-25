@@ -34,9 +34,8 @@ final class TokenAdapter implements TokenInterface
     ];
 
     public function __construct(
-        private readonly Token $token
-    ) {
-    }
+        private readonly Token $token,
+    ) {}
 
     public function isRootKeyword(): bool
     {

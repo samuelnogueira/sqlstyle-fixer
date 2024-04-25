@@ -10,8 +10,7 @@ final class StatementSplitter
 {
     public function __construct(
         private readonly TokenListInterface $tokenList,
-    ) {
-    }
+    ) {}
 
     public static function fromTokenList(TokenListInterface $tokenList): self
     {

@@ -143,7 +143,7 @@ final class Fixer
         TokenInterface|null $prevKeyword,
         TokenInterface|null $prev,
         TokenInterface $token,
-        TokenInterface|null $next
+        TokenInterface|null $next,
     ): bool {
         if (!$token->isLogicalOperator()) {
             return false;
@@ -170,7 +170,7 @@ final class Fixer
         TokenInterface|null $prevNonWs,
         TokenInterface|null $prev,
         TokenInterface      $token,
-        TokenInterface|null $next
+        TokenInterface|null $next,
     ): bool {
         if (!$token->isRootKeyword()) {
             return false;
@@ -330,9 +330,12 @@ final class Fixer
         }
     }
 
-    private static function startsNewRiver(TokenInterface $nextNonWs): bool
+    /**
+     * Returns TRUE if token should start a new river (ex. sub-query).
+     */
+    private static function startsNewRiver(TokenInterface $token): bool
     {
-        return $nextNonWs->isSelect() === true
-            || $nextNonWs->isPartitionBy() === true;
+        return $token->isSelect() === true
+            || $token->isPartitionBy() === true;
     }
 }

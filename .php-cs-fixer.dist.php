@@ -7,9 +7,9 @@ use PhpCsFixer\Finder;
 
 return (new Config())
     ->setRules([
-        '@PSR12' => true,
+        '@PER-CS2.0' => true,
     ])
     ->setFinder(
         (new Finder())
-            ->in(__DIR__)
+            ->in(__DIR__),
     );
