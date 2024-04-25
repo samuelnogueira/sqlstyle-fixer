@@ -44,6 +44,14 @@ interface TokenInterface
 
     public function isAlias(): bool;
 
+    public function isCase(): bool;
+
+    public function isCaseClause(): bool;
+
+    public function isThen(): bool;
+
+    public function isEnd(): bool;
+
     public function hasTwoLineBreaks(): bool;
 
     public function firstWordLength(): int;

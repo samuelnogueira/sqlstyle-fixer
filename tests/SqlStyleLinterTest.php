@@ -67,8 +67,37 @@ SQL,
 SELECT LAG(
     my_column
 )
-SQL
-            )
+SQL,
+            ),
+        );
+    }
+
+    public function testCaseStatement(): void
+    {
+        self::assertEquals(
+            <<<'SQL'
+SELECT CASE
+       WHEN COUNT(*) = 1 THEN 'One-time Customer'
+       WHEN COUNT(*) = 2 THEN 'Repeated Customer'
+       WHEN COUNT(*) = 3 THEN 'Frequent Customer'
+       ELSE 'Loyal Customer'
+       END AS customerType
+  FROM orders
+ GROUP BY customerName
+SQL,
+            $this->subject->fixString(
+                <<<'SQL'
+SELECT
+    CASE
+        WHEN COUNT(*) = 1 THEN 'One-time Customer'
+        WHEN COUNT(*) = 2 THEN 'Repeated Customer'
+        WHEN COUNT(*) = 3 THEN 'Frequent Customer'
+        ELSE 'Loyal Customer'
+    END AS customerType
+FROM orders
+GROUP BY customerName
+SQL,
+            ),
         );
     }
 

@@ -26,7 +26,8 @@ new users familiarize themselves with the code quickly.
                         DATE_TRUNC('month', some_cte.date_field_at) AS date_field_month,
                         IFF(my_data.detailed_field_3 > my_data.field_2, TRUE, FALSE) AS is_boolean,
                         CASE
-                        WHEN my_data.cancellation_date IS NULL AND my_data.expiration_date IS NOT NULL THEN my_data.expiration_date
+                        WHEN my_data.cancellation_date IS NULL
+                             AND my_data.expiration_date IS NOT NULL THEN my_data.expiration_date
                         WHEN my_data.cancellation_date IS NULL THEN my_data.start_date + 7 -- There is a reason for this number
                         ELSE my_data.cancellation_date
                         END AS adjusted_cancellation_date,

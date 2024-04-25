@@ -20,7 +20,7 @@ final class Fixer
 
     /** @var list<int> */
     private array $riverStack = [];
-    private bool $insideJoin = false;
+    private int|null $logicalOperatorOffset = null;
     private int $cursorCol = 0;
     public string|null $debugString = null;
 
@@ -67,6 +67,7 @@ final class Fixer
 
             // Stop at the first handler that changes something (i.e. returns true).
             $this->handleParenthesis($prevNonWs, $prev, $token, $nextNonWs)
+            || $this->handleCaseStatement($prevNonWs, $prev, $token, $next)
             || $this->handleUnion($prev, $token, $next)
             || $this->handleJoin($prevJoin, $prev, $token)
             || $this->handleLogicalOperator($prevKeyword, $prev, $token, $next)
@@ -109,9 +110,7 @@ final class Fixer
 
             return true;
         } elseif ($token->isCloseParenthesis()) {
-            if ($prev?->isWhitespace() === true) {
-                $prev->replaceContent('');
-            }
+            self::replaceWhitespace($prev, '');
 
             array_shift($this->riverStack);
 
@@ -132,9 +131,7 @@ final class Fixer
             $prev->replaceContent(PHP_EOL . PHP_EOL . $leftPadding);
         }
 
-        if ($next?->isWhitespace() === true) {
-            $next->replaceContent(PHP_EOL . PHP_EOL);
-        }
+        self::replaceWhitespace($next, PHP_EOL . PHP_EOL);
 
         return true;
     }
@@ -150,8 +147,8 @@ final class Fixer
         }
 
         if ($prev?->isWhitespace() === true) {
-            if ($this->insideJoin) {
-                $prev->replaceContent(PHP_EOL . str_repeat(' ', $this->river() + 4));
+            if ($this->logicalOperatorOffset !== null) {
+                $prev->replaceContent(PHP_EOL . str_repeat(' ', $this->river() + $this->logicalOperatorOffset));
             } elseif ($prevKeyword?->isBetween() === true) {
                 $prev->replaceContent(' ');
             } else {
@@ -159,9 +156,7 @@ final class Fixer
             }
         }
 
-        if ($next?->isWhitespace() === true) {
-            $next->replaceContent(' ');
-        }
+        self::replaceWhitespace($next, ' ');
 
         return true;
     }
@@ -184,9 +179,7 @@ final class Fixer
             }
         }
 
-        if ($next?->isWhitespace() === true) {
-            $next->replaceContent(' ');
-        }
+        self::replaceWhitespace($next, ' ');
 
         return true;
     }
@@ -197,17 +190,7 @@ final class Fixer
             return false;
         }
 
-        if ($prev !== null && $prev->isWhitespace()) {
-            if ($prevNonWs !== null && ($prevNonWs->isRootKeyword() || $prevNonWs->isDistinct())) {
-                // First expression should be in the same line as the root keyword
-                $prev->replaceContent(' ');
-            } elseif ($prevNonWs !== null && $prevNonWs->isOpenParenthesis()) {
-                $prev->replaceContent('');
-            } elseif (! $prev->isSingleSpace()) {
-                // Only replace previous whitespace content if it's not an accepted format already
-                $this->alignOtherSideOfRiver($prev);
-            }
-        }
+        $this->alignExpression($prevNonWs, $prev);
 
         return true;
     }
@@ -216,13 +199,13 @@ final class Fixer
     {
         if (!$token->isJoin() && !$token->isOn()) {
             if ($token->isWhere()) {
-                $this->insideJoin = false;
+                $this->logicalOperatorOffset = null;
             }
 
             return false;
         }
 
-        $this->insideJoin = true;
+        $this->logicalOperatorOffset = 4;
 
         if ($prev?->isWhitespace() === true) {
             if (
@@ -247,12 +230,41 @@ final class Fixer
             return false;
         }
 
-        if ($prev?->isWhitespace() === true) {
-            $prev->replaceContent(' ');
+        self::replaceWhitespace($prev, ' ');
+        self::replaceWhitespace($next, ' ');
+
+        return true;
+    }
+
+    private function handleCaseStatement(
+        TokenInterface|null $prevNonWs,
+        TokenInterface|null $prev,
+        TokenInterface $token,
+        TokenInterface|null $next,
+    ): bool {
+        if (
+            ! $token->isCase() &&
+            ! $token->isCaseClause() &&
+            ! $token->isThen() &&
+            ! $token->isEnd()
+        ) {
+            return false;
         }
 
-        if ($next?->isWhitespace() === true) {
-            $next->replaceContent(' ');
+        if ($token->isCase()) {
+            assert($this->logicalOperatorOffset === null);
+            $this->logicalOperatorOffset = 6;
+        }
+
+        if ($token->isEnd()) {
+            assert($this->logicalOperatorOffset === 6);
+            $this->logicalOperatorOffset = null;
+        }
+
+        if ($token->isThen()) {
+            self::replaceWhitespace($prev, ' ');
+        } else {
+            $this->alignExpression($prevNonWs, $prev);
         }
 
         return true;
@@ -281,8 +293,13 @@ final class Fixer
         $prev->replaceContent(PHP_EOL . str_repeat(' ', $river - $firstWordLength));
     }
 
-    private function alignOtherSideOfRiver(TokenInterface $prev): void
+    private function alignOtherSideOfRiver(TokenInterface|null $prev): void
     {
+        if ($prev === null) {
+            return;
+        }
+
+        assert($prev->isWhitespace());
         $prev->replaceContent(' ');
         $this->alignOtherSideOfRiverKeepLineBreak($prev);
     }
@@ -295,6 +312,23 @@ final class Fixer
         }
 
         $prev->replaceContent($lineBreak . str_repeat(' ', $this->river() + 1));
+    }
+
+    private function alignExpression(TokenInterface|null $prevNonWs, TokenInterface|null $prev): void
+    {
+        if ($prev?->isWhitespace() !== true) {
+            return;
+        }
+
+        if ($prevNonWs !== null && ($prevNonWs->isRootKeyword() || $prevNonWs->isDistinct())) {
+            // First expression should be in the same line as the root keyword
+            $prev->replaceContent(' ');
+        } elseif ($prevNonWs !== null && $prevNonWs->isOpenParenthesis()) {
+            $prev->replaceContent('');
+        } elseif (! $prev->isSingleSpace()) {
+            // Only replace previous whitespace content if it's not an accepted format already
+            $this->alignOtherSideOfRiver($prev);
+        }
     }
 
     /**
@@ -337,5 +371,14 @@ final class Fixer
     {
         return $token->isSelect() === true
             || $token->isPartitionBy() === true;
+    }
+
+    private static function replaceWhitespace(TokenInterface|null $token, string $content): void
+    {
+        if ($token?->isWhitespace() !== true) {
+            return;
+        }
+
+        $token->replaceContent($content);
     }
 }

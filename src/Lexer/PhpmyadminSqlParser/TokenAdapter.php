@@ -32,6 +32,10 @@ final class TokenAdapter implements TokenInterface
         'OR' => true,
         'XOR' => true,
     ];
+    private const CASE_CLAUSES = [
+        'WHEN' => true,
+        'ELSE' => true,
+    ];
 
     public function __construct(
         private readonly Token $token,
@@ -178,5 +182,25 @@ final class TokenAdapter implements TokenInterface
     public function isPartitionBy(): bool
     {
         return $this->token->keyword === 'PARTITION BY';
+    }
+
+    public function isCase(): bool
+    {
+        return $this->token->keyword === 'CASE';
+    }
+
+    public function isCaseClause(): bool
+    {
+        return isset(self::CASE_CLAUSES[$this->token->keyword]);
+    }
+
+    public function isEnd(): bool
+    {
+        return $this->token->keyword === 'END';
+    }
+
+    public function isThen(): bool
+    {
+        return $this->token->keyword === 'THEN';
     }
 }
