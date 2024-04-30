@@ -122,6 +122,22 @@ SQL,
         );
     }
 
+    public function testSpacesAddedBetweenOrderByExpressions(): void
+    {
+        self::assertEquals(
+            <<<'SQL'
+SELECT 1, 2
+ ORDER BY 1, 2
+SQL,
+            $this->subject->fixString(
+                <<<'SQL'
+SELECT 1,2 ORDER BY 1,2
+SQL,
+            ),
+        );
+
+    }
+
     /** @return iterable<string, array{string}> */
     public static function provideBadExamples(): iterable
     {

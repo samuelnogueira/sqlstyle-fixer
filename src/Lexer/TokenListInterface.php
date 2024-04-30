@@ -20,9 +20,5 @@ interface TokenListInterface
 
     public function toString(): string;
 
-    public function copySlice(int $offset): self;
-
     public function firstNonWhitespace(): TokenInterface|null;
-
-    public function isFirstNonWhitespace(int $index): bool;
 }

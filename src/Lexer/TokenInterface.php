@@ -52,6 +52,12 @@ interface TokenInterface
 
     public function isEnd(): bool;
 
+    public function isScalar(): bool;
+
+    public function isOperator(): bool;
+
+    public function hasLineBreak(): bool;
+
     public function hasTwoLineBreaks(): bool;
 
     public function firstWordLength(): int;

@@ -190,7 +190,11 @@ final class Fixer
         TokenInterface $token,
         TokenInterface|null $nextNonWs,
     ): bool {
-        if (!$token->isNone() && !self::isFunction($token, $nextNonWs)) {
+        if (
+            !$token->isScalar() &&
+            !$token->isNone() &&
+            !self::isFunction($token, $nextNonWs)
+        ) {
             return false;
         }
 
@@ -302,8 +306,7 @@ final class Fixer
             return;
         }
 
-        assert($prev->isWhitespace());
-        $prev->replaceContent(' ');
+        self::replaceWhitespace($prev, ' ');
         $this->alignOtherSideOfRiverKeepLineBreak($prev);
     }
 
@@ -314,22 +317,21 @@ final class Fixer
             $lineBreak .= PHP_EOL;
         }
 
-        $prev->replaceContent($lineBreak . str_repeat(' ', $this->river() + 1));
+        self::replaceWhitespace($prev, $lineBreak . str_repeat(' ', $this->river() + 1));
     }
 
     private function alignExpression(TokenInterface|null $prevNonWs, TokenInterface|null $prev): void
     {
-        if ($prev?->isWhitespace() !== true) {
-            return;
-        }
-
-        if ($prevNonWs !== null && ($prevNonWs->isRootKeyword() || $prevNonWs->isDistinct())) {
+        if ($prevNonWs?->isOpenParenthesis() === true) {
+            self::replaceWhitespace($prev, '');
+        } elseif (
             // First expression should be in the same line as the root keyword
-            $prev->replaceContent(' ');
-        } elseif ($prevNonWs !== null && $prevNonWs->isOpenParenthesis()) {
-            $prev->replaceContent('');
-        } elseif (! $prev->isSingleSpace()) {
-            // Only replace previous whitespace content if it's not an accepted format already
+            $prevNonWs?->isRootKeyword() === true ||
+            $prevNonWs?->isDistinct() === true ||
+            $prev?->isOperator() === true
+        ) {
+            self::replaceWhitespace($prev, ' ');
+        } elseif ($prev?->hasLineBreak() === true) {
             $this->alignOtherSideOfRiver($prev);
         }
     }
@@ -380,11 +382,12 @@ final class Fixer
 
     private static function replaceWhitespace(TokenInterface|null $token, string $content): void
     {
-        if ($token?->isWhitespace() !== true) {
+        if ($token === null) {
             return;
         }
 
-        $token->replaceContent($content);
+        // Ugly hack to insert spaces when we're missing a whitespace token.
+        $token->replaceContent(trim($token->toString()) . $content);
     }
 
     private static function isFunction(TokenInterface $token, TokenInterface|null $nextNonWs): bool

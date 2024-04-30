@@ -36,6 +36,11 @@ final class TokenAdapter implements TokenInterface
         'WHEN' => true,
         'ELSE' => true,
     ];
+    private const SCALAR_TYPES = [
+        Token::TYPE_BOOL => true,
+        Token::TYPE_NUMBER => true,
+        Token::TYPE_STRING => true,
+    ];
 
     public function __construct(
         private readonly Token $token,
@@ -202,5 +207,21 @@ final class TokenAdapter implements TokenInterface
     public function isThen(): bool
     {
         return $this->token->keyword === 'THEN';
+    }
+
+    public function isScalar(): bool
+    {
+        return isset(self::SCALAR_TYPES[$this->token->type]);
+    }
+
+    public function hasLineBreak(): bool
+    {
+        return substr_count($this->token->token, PHP_EOL) > 0;
+    }
+
+    public function isOperator(): bool
+    {
+        return $this->token->type === Token::TYPE_OPERATOR
+            && $this->token->token !== '.';
     }
 }
