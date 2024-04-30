@@ -122,20 +122,19 @@ SQL,
         );
     }
 
-    public function testSpacesAddedBetweenOrderByExpressions(): void
+    public function testOrderBy(): void
     {
         self::assertEquals(
             <<<'SQL'
 SELECT 1, 2
- ORDER BY 1, 2
+ ORDER BY 1, 2 DESC
 SQL,
             $this->subject->fixString(
                 <<<'SQL'
-SELECT 1,2 ORDER BY 1,2
+SELECT 1,2 ORDER BY 1,2 DESC
 SQL,
             ),
         );
-
     }
 
     /** @return iterable<string, array{string}> */

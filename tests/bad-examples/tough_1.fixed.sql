@@ -38,7 +38,8 @@ new users familiarize themselves with the code quickly.
                         LEFT JOIN some_cte
                         ON my_data.id = some_cte.id
                   WHERE my_data.field_1 = 'abc'
-                    AND (my_data.field_2 = 'def' OR my_data.field_2 = 'ghi')
+                    AND (my_data.field_2 = 'def'
+                     OR my_data.field_2 = 'ghi')
                   GROUP BY 1, 2, 3, 4, 5, 6
                  HAVING COUNT(*) > 1
                   ORDER BY 8 DESC)

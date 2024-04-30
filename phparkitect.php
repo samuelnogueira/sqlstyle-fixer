@@ -14,6 +14,6 @@ return static function (Config $config): void {
         Rule::allClasses()
             ->that(new NotResideInTheseNamespaces('Samuelnogueira\SqlstyleFixer\Lexer\PhpmyadminSqlParser'))
             ->should(new NotDependsOnTheseNamespaces('PhpMyAdmin\SqlParser'))
-            ->because('we do not want to be vendor locked')
+            ->because('we do not want to be vendor locked'),
     );
 };

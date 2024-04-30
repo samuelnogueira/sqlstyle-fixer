@@ -15,21 +15,22 @@ final class TokenAdapter implements TokenInterface
         'OR' => true,
     ];
     private const NOT_ROOT_KEYWORDS = [
-        'INTO' => true,
         'CHECK' => true,
-        'ON' => true,
+        'DESC'  => true,
+        'INTO'  => true,
+        'ON'    => true,
     ];
     private const DDL_KEYWORDS = [
-        'ALTER' => true,
-        'CREATE' => true,
-        'DROP' => true,
-        'RENAME' => true,
+        'ALTER'    => true,
+        'CREATE'   => true,
+        'DROP'     => true,
+        'RENAME'   => true,
         'TRUNCATE' => true,
     ];
     private const LOGICAL_OPERATORS = [
         'AND' => true,
         'NOT' => true,
-        'OR' => true,
+        'OR'  => true,
         'XOR' => true,
     ];
     private const CASE_CLAUSES = [
@@ -37,7 +38,7 @@ final class TokenAdapter implements TokenInterface
         'ELSE' => true,
     ];
     private const SCALAR_TYPES = [
-        Token::TYPE_BOOL => true,
+        Token::TYPE_BOOL   => true,
         Token::TYPE_NUMBER => true,
         Token::TYPE_STRING => true,
     ];
