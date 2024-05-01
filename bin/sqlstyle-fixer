@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-use Samuelnogueira\SqlstyleFixer\Fixer;
+use Samuelnogueira\SqlstyleFixer\Formatter;
 
 require $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
@@ -11,5 +11,5 @@ echo (static function ($stream): string {
         throw new RuntimeException('Could not read stream');
     }
 
-    return (new Fixer())->fixString($sql);
+    return (new Formatter())->formatString($sql);
 })(STDIN);

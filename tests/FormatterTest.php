@@ -9,22 +9,22 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Samuelnogueira\SqlstyleFixer\Fixer;
+use Samuelnogueira\SqlstyleFixer\Formatter;
 use SplFileInfo;
 
 use function basename;
 use function Safe\file_get_contents;
 
-final class SqlStyleLinterTest extends TestCase
+final class FormatterTest extends TestCase
 {
-    private Fixer $subject;
+    private Formatter $subject;
 
     #[DataProvider('provideGoodExamplesFromWebsite')]
     public function testGoodExamplesFromWebsite(string $filename): void
     {
         $sql = file_get_contents($filename);
 
-        $result = $this->subject->fixString($sql);
+        $result = $this->subject->formatString($sql);
 
         self::assertEquals($sql, $result);
     }
@@ -51,7 +51,7 @@ final class SqlStyleLinterTest extends TestCase
     {
         $sql = file_get_contents($fileBefore);
 
-        $result = $this->subject->fixString($sql);
+        $result = $this->subject->formatString($sql);
 
         self::assertStringEqualsFile($fileAfter, $result);
     }
@@ -62,7 +62,7 @@ final class SqlStyleLinterTest extends TestCase
             <<<'SQL'
 SELECT LAG(my_column)
 SQL,
-            $this->subject->fixString(
+            $this->subject->formatString(
                 <<<'SQL'
 SELECT LAG(
     my_column
@@ -85,7 +85,7 @@ SELECT CASE
   FROM orders
  GROUP BY customerName
 SQL,
-            $this->subject->fixString(
+            $this->subject->formatString(
                 <<<'SQL'
 SELECT
     CASE
@@ -110,7 +110,7 @@ SELECT AVG(b.height) AS average_height,
        COUNT(*) AS total
   FROM botanic_garden_flora AS b
 SQL,
-            $this->subject->fixString(
+            $this->subject->formatString(
                 <<<'SQL'
 SELECT
 AVG(b.height) AS average_height,
@@ -129,7 +129,7 @@ SQL,
 SELECT 1, 2
  ORDER BY 1, 2 DESC
 SQL,
-            $this->subject->fixString(
+            $this->subject->formatString(
                 <<<'SQL'
 SELECT 1,2 ORDER BY 1,2 DESC
 SQL,
@@ -157,6 +157,6 @@ SQL,
     {
         parent::setUp();
 
-        $this->subject = new Fixer(debug: true);
+        $this->subject = new Formatter(debug: true);
     }
 }

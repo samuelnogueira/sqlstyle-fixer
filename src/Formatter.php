@@ -12,9 +12,8 @@ use Samuelnogueira\SqlstyleFixer\Lexer\TokenListInterface;
 
 /**
  * @api
- * @immutable
  */
-final class Fixer
+final class Formatter
 {
     private readonly LexerInterface $lexer;
 
@@ -29,7 +28,7 @@ final class Fixer
         $this->lexer = $lexer ?? new LexerAdapter();
     }
 
-    public function fixString(string $sql): string
+    public function formatString(string $sql): string
     {
         $list = $this->lexer->parseString($sql);
 
