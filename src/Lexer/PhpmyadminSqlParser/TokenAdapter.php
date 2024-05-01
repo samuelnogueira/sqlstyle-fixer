@@ -125,11 +125,6 @@ final class TokenAdapter implements TokenInterface
         return $this->token->type === Token::TYPE_NONE;
     }
 
-    public function isSingleSpace(): bool
-    {
-        return $this->token->token === ' ';
-    }
-
     public function isJoin(): bool
     {
         return (Parser::$KEYWORD_PARSERS[$this->token->keyword]['field'] ?? null) === 'join';

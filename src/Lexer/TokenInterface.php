@@ -28,8 +28,6 @@ interface TokenInterface
 
     public function isNone(): bool;
 
-    public function isSingleSpace(): bool;
-
     public function isWhere(): bool;
 
     public function isDistinct(): bool;
