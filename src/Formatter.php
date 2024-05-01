@@ -21,9 +21,8 @@ final class Formatter
     private array $riverStack = [];
     private int|null $logicalOperatorOffset = null;
     private int $cursorCol = 0;
-    public string|null $debugString = null;
 
-    public function __construct(LexerInterface|null $lexer = null, private readonly bool $debug = false)
+    public function __construct(LexerInterface|null $lexer = null)
     {
         $this->lexer = $lexer ?? new LexerAdapter();
     }
@@ -46,10 +45,6 @@ final class Formatter
         $tokens = $list->toArray();
         $this->initializeRiver($list);
         foreach ($tokens as $i => $token) {
-            if ($this->debug) {
-                $this->updateDebugString($tokens, $i);
-            }
-
             // Ignore whitespaces
             if ($token->isWhitespace()) {
                 continue;
@@ -301,18 +296,14 @@ final class Formatter
 
     private function alignOtherSideOfRiver(TokenInterface|null $prev): void
     {
-        if ($prev === null) {
-            return;
-        }
-
         self::replaceWhitespace($prev, ' ');
         $this->alignOtherSideOfRiverKeepLineBreak($prev);
     }
 
-    private function alignOtherSideOfRiverKeepLineBreak(TokenInterface $prev): void
+    private function alignOtherSideOfRiverKeepLineBreak(TokenInterface|null $prev): void
     {
         $lineBreak = PHP_EOL;
-        if ($prev->hasTwoLineBreaks()) {
+        if ($prev?->hasTwoLineBreaks() === true) {
             $lineBreak .= PHP_EOL;
         }
 
@@ -332,21 +323,6 @@ final class Formatter
             self::replaceWhitespace($prev, ' ');
         } elseif ($prev?->hasLineBreak() === true) {
             $this->alignOtherSideOfRiver($prev);
-        }
-    }
-
-    /**
-     * @param list<TokenInterface> $tokens
-     */
-    private function updateDebugString(array $tokens, int $index): void
-    {
-        $this->debugString = '';
-        foreach ($tokens as $i => $token) {
-            $tokenStr = $i === $index
-                ? '›' . $token->toString() . '‹'
-                : $token->toString();
-
-            $this->debugString .= $tokenStr;
         }
     }
 
@@ -381,12 +357,8 @@ final class Formatter
 
     private static function replaceWhitespace(TokenInterface|null $token, string $content): void
     {
-        if ($token === null) {
-            return;
-        }
-
         // Ugly hack to insert spaces when we're missing a whitespace token.
-        $token->replaceContent(trim($token->toString()) . $content);
+        $token?->replaceContent(trim($token->toString()) . $content);
     }
 
     private static function isFunction(TokenInterface $token, TokenInterface|null $nextNonWs): bool

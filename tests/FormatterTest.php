@@ -157,6 +157,6 @@ SQL,
     {
         parent::setUp();
 
-        $this->subject = new Formatter(debug: true);
+        $this->subject = new Formatter();
     }
 }
