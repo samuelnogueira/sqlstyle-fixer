@@ -1,0 +1,15 @@
+#!/usr/bin/env php
+<?php
+
+use Samuelnogueira\SqlstyleFixer\Fixer;
+
+require $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
+
+echo (static function ($stream): string {
+    $sql = stream_get_contents($stream);
+    if ($sql === false) {
+        throw new RuntimeException('Could not read stream');
+    }
+
+    return (new Fixer())->fixString($sql);
+})(STDIN);
