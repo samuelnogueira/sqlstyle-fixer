@@ -13,7 +13,7 @@ use Samuelnogueira\SqlstyleFixer\Lexer\TokenListInterface;
 /**
  * @api
  */
-final class Formatter
+final class Formatter implements FormatterInterface
 {
     private readonly LexerInterface $lexer;
 

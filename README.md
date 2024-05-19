@@ -5,3 +5,4 @@ TODO:
 - [ ] Handle DQL (Doctrine Query Language)
 - [ ] Integrate with PHP Coding Standards Fixer
 - [ ] CLI for IDE integration
+- [ ] Add `AS` keyword when missing (https://www.sqlstyle.guide/#aliasing-or-correlations)
