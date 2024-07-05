@@ -57,8 +57,6 @@ final class Formatter implements FormatterInterface
             $prevNonWs = $prev?->isWhitespace() === false ? $prev : ($tokens[$i - 2] ?? null);
             $nextNonWs = $next?->isWhitespace() === false ? $next : ($tokens[$i + 2] ?? null);
 
-            $this->handleCasing($token);
-
             // Stop at the first handler that changes something (i.e. returns true).
             $this->handleParenthesis($prevNonWs, $prev, $token, $nextNonWs)
             || $this->handleCaseStatement($prevNonWs, $prev, $token)
@@ -77,15 +75,6 @@ final class Formatter implements FormatterInterface
                 $prevKeyword = $token;
             }
         }
-    }
-
-    private function handleCasing(TokenInterface $token): void
-    {
-        if (!$token->isKeyword()) {
-            return;
-        }
-
-        $token->toUpperCase();
     }
 
     private function handleParenthesis(
