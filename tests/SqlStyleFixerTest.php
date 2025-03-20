@@ -54,7 +54,7 @@ PHP,
                 <<<'PHP'
 <?php
 $a = <<<'SQL'
-    SELECT o.order_id, o.order_date, c.customer_name
+SELECT o.order_id, o.order_date, c.customer_name
     FROM orders AS o
     INNER JOIN customers AS c ON o.customer_id = c.customer_id
     WHERE c.city = :city
@@ -80,7 +80,7 @@ PHP,
                 <<<'PHP'
 <?php
 $a = <<<DQL
-     SELECT u FROM MyProject\Model\User u WHERE u.age > 20
+SELECT u FROM MyProject\Model\User u WHERE u.age > 20
 DQL;
 PHP,
             ),
@@ -104,11 +104,11 @@ PHP,
                 <<<'PHP'
 <?php
 $a = <<<'DQL'
-    SELECT p
-    FROM MyProject\Model\Post p
-    JOIN p.author a
-    WHERE p.published = true
-    AND a.followersCount > 100
+SELECT p
+FROM MyProject\Model\Post p
+JOIN p.author a
+WHERE p.published = true
+AND a.followersCount > 100
 DQL;
 PHP,
             ),

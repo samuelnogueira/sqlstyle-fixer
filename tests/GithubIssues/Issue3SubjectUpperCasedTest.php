@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Samuelnogueira\SqlstyleFixerTests\GithubIssues;
@@ -17,7 +18,7 @@ final class Issue3SubjectUpperCasedTest extends TestCase
             <<<'PHP'
 <?php
             $this->addSql(<<<'SQL'
-INSERT INTO tbl_xz9qr (col_ef34, `subject`)
+INSERT INTO tbl_xz9qr (col_ef34, subject)
 VALUES ('my_value_1', 'my_subject_1')
 SQL
         );
@@ -26,10 +27,9 @@ PHP,
                 <<<'PHP'
 <?php
             $this->addSql(<<<'SQL'
-            INSERT INTO tbl_xz9qr
-                (col_ef34, subject)
-            VALUES
-                ('my_value_1', 'my_subject_1')
+INSERT INTO tbl_xz9qr (col_ef34, subject)
+VALUES
+    ('my_value_1', 'my_subject_1')
 SQL
         );
 PHP,

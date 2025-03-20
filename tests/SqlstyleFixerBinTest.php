@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Samuelnogueira\SqlstyleFixerTests;
 
 use PHPUnit\Framework\TestCase;
-
 use Symfony\Component\Process\PhpSubprocess;
 
 final class SqlstyleFixerBinTest extends TestCase
@@ -16,8 +15,8 @@ final class SqlstyleFixerBinTest extends TestCase
         $process
             ->setInput(
                 <<<'SQL'
-select file_hash  -- stored ssdeep hash
-from file_system where file_name = '.vimrc';
+SELECT file_hash  -- stored ssdeep hash
+FROM file_system WHERE file_name = '.vimrc';
 SQL,
             )
             ->mustRun();

@@ -1,5 +1,5 @@
 SELECT
-  date(submission_timestamp) AS day
+  DATE(submission_timestamp) AS day
 FROM
   telemetry.main
 LIMIT
