@@ -46,7 +46,7 @@ final class SqlStyleFixer implements FixerInterface
     public function fix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $index => $token) {
-            if ($token?->isGivenKind(T_START_HEREDOC) !== true) {
+            if ($token->isGivenKind(T_START_HEREDOC) !== true) {
                 continue;
             }
 
