@@ -31,7 +31,7 @@
         "phpmyadmin/sql-parser": "^5.8"
     },
     "require-dev": {
-        "phparkitect/phparkitect": "^0.3.29 || ^1.0.0",
+        "phparkitect/phparkitect": "1.3.1",
         "phpstan/phpstan": "1.12.34",
         "phpstan/phpstan-strict-rules": "1.6.2",
         "phpunit/phpunit": "10.5.62",
